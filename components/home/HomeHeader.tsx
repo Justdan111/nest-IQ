@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 type Props = {
   name: string;
@@ -8,10 +9,11 @@ type Props = {
 };
 
 export function HomeHeader({ name, onMenu, onBell }: Props) {
+  const { open } = useSidebar();
   return (
     <View className="px-5 pt-2">
       <View className="flex-row items-center justify-between mb-5">
-        <Pressable onPress={onMenu} hitSlop={10}>
+        <Pressable onPress={onMenu ?? open} hitSlop={10}>
           <Ionicons name="menu" size={26} color="#fff" />
         </Pressable>
         <Pressable onPress={onBell} hitSlop={10}>

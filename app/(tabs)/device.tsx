@@ -7,10 +7,12 @@ import { CircularTempSlider } from '@/components/device/CircularTempSlider';
 import { DeviceCard } from '@/components/ui/DeviceCard';
 import { MoodSelector } from '@/components/device/MoodSelector';
 import { Button } from '@/components/ui/Button';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 type Mood = 'cool' | 'heat' | 'wind' | 'auto';
 
 export default function DeviceScreen() {
+  const { open } = useSidebar();
   const { devices, toggleDevice } = useDevices();
   const [mood, setMood] = useState<Mood>('cool');
 
@@ -23,7 +25,7 @@ export default function DeviceScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-3">
-          <Pressable hitSlop={10}>
+          <Pressable onPress={open} hitSlop={10}>
             <Ionicons name="menu" size={26} color="#fff" />
           </Pressable>
           <Text className="text-white font-semibold text-lg">Device</Text>

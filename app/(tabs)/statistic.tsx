@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EnergyBar } from '@/components/statistic/EnergyBar';
 import { ConsumptionRow } from '@/components/statistic/ConsumptionRow';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 const WEEK_DATA = [
   { value: 60, label: 'Fri' },
@@ -39,6 +40,7 @@ const CONSUMPTION = [
 ];
 
 export default function StatisticScreen() {
+  const { open } = useSidebar();
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
       <ScrollView
@@ -46,7 +48,7 @@ export default function StatisticScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-6">
-          <Pressable hitSlop={10}>
+          <Pressable onPress={open} hitSlop={10}>
             <Ionicons name="menu" size={26} color="#fff" />
           </Pressable>
           <Text className="text-white font-semibold text-lg">Statistic</Text>

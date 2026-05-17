@@ -8,8 +8,10 @@ import { SceneRow } from '@/components/automations/SceneRow';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SCENES, SUGGESTED_SCENES } from '@/constants/Scenes';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 export default function AutomationsScreen() {
+  const { open } = useSidebar();
   const [showAddScene, setShowAddScene] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [sceneName, setSceneName] = useState('');
@@ -22,7 +24,7 @@ export default function AutomationsScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-6">
-          <Pressable hitSlop={10}>
+          <Pressable onPress={open} hitSlop={10}>
             <Ionicons name="menu" size={26} color="#fff" />
           </Pressable>
           <Text className="text-white font-semibold text-lg">Automations</Text>

@@ -2,6 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { useSidebar } from '@/components/ui/Sidebar';
 
 const CAMERAS = [
   { id: '1', room: 'Bed Room', floor: '2nd Floor', date: 'Today', time: '10:30 AM', active: true },
@@ -11,6 +12,7 @@ const CAMERAS = [
 ];
 
 export default function CameraScreen() {
+  const { open } = useSidebar();
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
       <ScrollView
@@ -18,7 +20,7 @@ export default function CameraScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-4">
-          <Pressable hitSlop={10}>
+          <Pressable onPress={open} hitSlop={10}>
             <Ionicons name="menu" size={26} color="#fff" />
           </Pressable>
           <Text className="text-white font-semibold text-lg">Real Time</Text>

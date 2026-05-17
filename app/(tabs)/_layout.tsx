@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { SidebarProvider } from '@/components/ui/Sidebar';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -16,8 +17,9 @@ function TabIcon({ name, focused }: { name: IconName; focused: boolean }) {
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
+    <SidebarProvider>
+      <Tabs
+        screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -60,6 +62,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => <TabIcon name="videocam" focused={focused} />,
         }}
       />
-    </Tabs>
+      </Tabs>
+    </SidebarProvider>
   );
 }
