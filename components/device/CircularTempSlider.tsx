@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedProps,
   useSharedValue,
 } from 'react-native-reanimated';
+import { useTheme } from '@/hooks/useTheme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -27,6 +28,7 @@ export function CircularTempSlider({
   initial = 24,
   onChange,
 }: Props) {
+  const { colors } = useTheme();
   const radius = (size - strokeWidth) / 2;
   const cx = size / 2;
   const cy = size / 2;
@@ -75,7 +77,7 @@ export function CircularTempSlider({
                 cx={cx}
                 cy={cy}
                 r={radius}
-                stroke="#1A1A1A"
+                stroke={colors.surfaceAlt}
                 strokeWidth={strokeWidth}
                 fill="none"
                 strokeDasharray={`${circumference * 0.75} ${circumference}`}
@@ -85,7 +87,7 @@ export function CircularTempSlider({
                 cx={cx}
                 cy={cy}
                 r={radius}
-                stroke="#3B6FF0"
+                stroke={colors.primary}
                 strokeWidth={strokeWidth}
                 fill="none"
                 strokeDasharray={`${circumference * 0.75} ${circumference}`}
@@ -96,7 +98,7 @@ export function CircularTempSlider({
             <SvgText
               x={cx}
               y={cy - size * 0.18}
-              fill="#555555"
+              fill={colors.textMuted}
               fontSize="11"
               textAnchor="middle"
             >
@@ -105,7 +107,7 @@ export function CircularTempSlider({
             <SvgText
               x={cx + size * 0.32}
               y={cy + 4}
-              fill="#555555"
+              fill={colors.textMuted}
               fontSize="11"
               textAnchor="middle"
             >
@@ -114,7 +116,7 @@ export function CircularTempSlider({
             <SvgText
               x={cx}
               y={cy + size * 0.22}
-              fill="#555555"
+              fill={colors.textMuted}
               fontSize="11"
               textAnchor="middle"
             >
@@ -123,7 +125,7 @@ export function CircularTempSlider({
             <SvgText
               x={cx - size * 0.32}
               y={cy + 4}
-              fill="#555555"
+              fill={colors.textMuted}
               fontSize="11"
               textAnchor="middle"
             >
@@ -133,10 +135,10 @@ export function CircularTempSlider({
         </Animated.View>
       </GestureDetector>
       <View className="absolute items-center">
-        <Text className="text-white font-bold" style={{ fontSize: 72 }}>
+        <Text className="text-text font-bold" style={{ fontSize: 72 }}>
           {value}°
         </Text>
-        <Text className="text-[#8A8A8A] text-sm">Room Temp</Text>
+        <Text className="text-textSecondary text-sm">Room Temp</Text>
       </View>
     </View>
   );

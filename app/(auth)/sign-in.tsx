@@ -4,23 +4,25 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0A0A]">
+    <SafeAreaView className="flex-1 bg-background">
       <View className="px-5 pt-2">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#fff" />
+          <Ionicons name="chevron-back" size={26} color={colors.text} />
         </Pressable>
       </View>
       <View className="flex-1 px-5 pt-8">
-        <Text className="text-white text-3xl font-bold">Sign In</Text>
-        <Text className="text-[#8A8A8A] text-base mt-2">
+        <Text className="text-text text-3xl font-bold">Sign In</Text>
+        <Text className="text-textSecondary text-base mt-2">
           Hi! Welcome back, you've been missed.
         </Text>
 
@@ -44,13 +46,13 @@ export default function SignInScreen() {
                   <Ionicons
                     name={showPwd ? 'eye-off-outline' : 'eye-outline'}
                     size={20}
-                    color="#8A8A8A"
+                    color={colors.textSecondary}
                   />
                 </Pressable>
               }
             />
             <Pressable className="mt-2 self-end" hitSlop={6}>
-              <Text className="text-[#E24B4A] text-sm">Forgot Password?</Text>
+              <Text className="text-error text-sm">Forgot Password?</Text>
             </Pressable>
           </View>
         </View>
@@ -60,9 +62,9 @@ export default function SignInScreen() {
         </View>
 
         <View className="flex-row items-center my-8">
-          <View className="flex-1 h-px bg-[#2A2A2A]" />
-          <Text className="text-[#8A8A8A] mx-3 text-sm">Or</Text>
-          <View className="flex-1 h-px bg-[#2A2A2A]" />
+          <View className="flex-1 h-px bg-border" />
+          <Text className="text-textSecondary mx-3 text-sm">Or</Text>
+          <View className="flex-1 h-px bg-border" />
         </View>
 
         <View className="flex-row justify-center gap-4">
@@ -72,7 +74,7 @@ export default function SignInScreen() {
           ].map((s) => (
             <Pressable
               key={s.name}
-              className="w-14 h-14 rounded-2xl bg-[#1A1A1A] items-center justify-center border border-[#2A2A2A]"
+              className="w-14 h-14 rounded-2xl bg-surface items-center justify-center border border-border"
             >
               <Ionicons name={s.name} size={24} color={s.color} />
             </Pressable>
@@ -100,19 +102,20 @@ function Field({
   keyboardType?: 'default' | 'email-address' | 'phone-pad';
   rightIcon?: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   return (
     <View>
-      <Text className="text-[#8A8A8A] text-sm mb-2">{label}</Text>
-      <View className="flex-row items-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4">
+      <Text className="text-textSecondary text-sm mb-2">{label}</Text>
+      <View className="flex-row items-center bg-surface border border-border rounded-xl px-4">
         <TextInput
           value={value}
           onChangeText={onChange}
           placeholder={placeholder}
-          placeholderTextColor="#555555"
+          placeholderTextColor={colors.textMuted}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           autoCapitalize="none"
-          className="flex-1 text-white py-3 text-base"
+          className="flex-1 text-text py-3 text-base"
         />
         {rightIcon}
       </View>

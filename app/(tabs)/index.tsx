@@ -15,7 +15,7 @@ export default function HomeScreen() {
   const frequentlyUsed = devices.slice(0, 4);
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppState } from '@/hooks/useAppState';
+import { useTheme } from '@/hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 const PANEL_WIDTH = Math.min(width * 0.78, 320);
@@ -46,6 +47,7 @@ const MENU_ITEMS: MenuItem[] = [
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user } = useAppState();
+  const { colors, isDark, toggleColorScheme } = useTheme();
   const [rendered, setRendered] = useState(false);
   const progress = useSharedValue(0);
 
@@ -104,28 +106,28 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
                 left: 0,
                 bottom: 0,
                 width: PANEL_WIDTH,
-                backgroundColor: '#1A1A1A',
+                backgroundColor: colors.surface,
               },
               panelStyle,
             ]}
           >
             <SafeAreaView edges={['top', 'bottom']} className="flex-1 px-5">
               <View className="flex-row items-center justify-between pt-2 mb-8">
-                <Text className="text-white font-semibold text-lg">Menu</Text>
+                <Text className="text-text font-semibold text-lg">Menu</Text>
                 <Pressable onPress={close} hitSlop={10}>
-                  <Ionicons name="close" size={24} color="#fff" />
+                  <Ionicons name="close" size={24} color={colors.text} />
                 </Pressable>
               </View>
 
               <View className="flex-row items-center mb-8">
-                <View className="w-14 h-14 rounded-full bg-[#3B6FF0] items-center justify-center">
+                <View className="w-14 h-14 rounded-full bg-primary items-center justify-center">
                   <Text className="text-white font-semibold text-xl">
                     {user.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
                 <View className="ml-3 flex-1">
-                  <Text className="text-white font-semibold text-base">{user.name}</Text>
-                  <Text className="text-[#8A8A8A] text-sm" numberOfLines={1}>
+                  <Text className="text-text font-semibold text-base">{user.name}</Text>
+                  <Text className="text-textSecondary text-sm" numberOfLines={1}>
                     {user.email}
                   </Text>
                 </View>
@@ -138,20 +140,43 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
                     onPress={() => go(item.route)}
                     className="flex-row items-center py-3.5"
                   >
-                    <Ionicons name={item.icon} size={22} color="#8A8A8A" />
-                    <Text className="text-white text-base ml-4">{item.label}</Text>
+                    <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
+                    <Text className="text-text text-base ml-4">{item.label}</Text>
                   </Pressable>
                 ))}
               </View>
 
-              <View className="h-px bg-[#2A2A2A] my-4" />
+              <View className="h-px bg-border my-4" />
+
+              <Pressable
+                onPress={toggleColorScheme}
+                className="flex-row items-center py-3.5"
+              >
+                <Ionicons
+                  name={isDark ? 'moon' : 'sunny'}
+                  size={22}
+                  color={colors.textSecondary}
+                />
+                <Text className="text-text text-base ml-4 flex-1">
+                  {isDark ? 'Dark Mode' : 'Light Mode'}
+                </Text>
+                <View
+                  className={`w-12 h-7 rounded-full px-0.5 justify-center ${isDark ? 'bg-primary' : 'bg-surfaceAlt'}`}
+                >
+                  <View
+                    className={`w-6 h-6 rounded-full bg-white ${isDark ? 'self-end' : 'self-start'}`}
+                  />
+                </View>
+              </Pressable>
+
+              <View className="h-px bg-border my-4" />
 
               <Pressable
                 onPress={() => go('/(auth)/welcome')}
                 className="flex-row items-center py-3.5"
               >
-                <Ionicons name="log-out-outline" size={22} color="#E24B4A" />
-                <Text className="text-[#E24B4A] text-base ml-4">Log Out</Text>
+                <Ionicons name="log-out-outline" size={22} color={colors.error} />
+                <Text className="text-error text-base ml-4">Log Out</Text>
               </Pressable>
             </SafeAreaView>
           </Animated.View>

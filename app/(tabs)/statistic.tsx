@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EnergyBar } from '@/components/statistic/EnergyBar';
 import { ConsumptionRow } from '@/components/statistic/ConsumptionRow';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { useTheme } from '@/hooks/useTheme';
 
 const WEEK_DATA = [
   { value: 60, label: 'Fri' },
@@ -41,57 +42,58 @@ const CONSUMPTION = [
 
 export default function StatisticScreen() {
   const { open } = useSidebar();
+  const { colors } = useTheme();
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-6">
           <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color="#fff" />
+            <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
-          <Text className="text-white font-semibold text-lg">Statistic</Text>
+          <Text className="text-text font-semibold text-lg">Statistic</Text>
           <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            <Ionicons name="notifications-outline" size={24} color={colors.text} />
           </Pressable>
         </View>
 
         <View className="px-5 flex-row gap-3 mb-6">
-          <View className="flex-1 bg-[#1A1A1A] rounded-2xl p-4 flex-row items-center">
-            <View className="w-11 h-11 rounded-full bg-[#EF9F27]/15 items-center justify-center">
+          <View className="flex-1 bg-surface rounded-2xl p-4 flex-row items-center">
+            <View className="w-11 h-11 rounded-full bg-warning/15 items-center justify-center">
               <Ionicons name="cash-outline" size={22} color="#EF9F27" />
             </View>
             <View className="ml-3">
-              <Text className="text-white text-lg font-bold">$170.00</Text>
-              <Text className="text-[#8A8A8A] text-xs">Cost</Text>
+              <Text className="text-text text-lg font-bold">$170.00</Text>
+              <Text className="text-textSecondary text-xs">Cost</Text>
             </View>
           </View>
-          <View className="flex-1 bg-[#1A1A1A] rounded-2xl p-4 flex-row items-center">
-            <View className="w-11 h-11 rounded-full bg-[#3B6FF0]/15 items-center justify-center">
+          <View className="flex-1 bg-surface rounded-2xl p-4 flex-row items-center">
+            <View className="w-11 h-11 rounded-full bg-primary/15 items-center justify-center">
               <Ionicons name="flash" size={22} color="#3B6FF0" />
             </View>
             <View className="ml-3">
-              <Text className="text-white text-lg font-bold">99 kWh</Text>
-              <Text className="text-[#8A8A8A] text-xs">Usage</Text>
+              <Text className="text-text text-lg font-bold">99 kWh</Text>
+              <Text className="text-textSecondary text-xs">Usage</Text>
             </View>
           </View>
         </View>
 
         <View className="px-5">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-white font-semibold text-lg">Activities</Text>
-            <View className="flex-row items-center bg-[#1A1A1A] rounded-full px-3 py-1.5 border border-[#2A2A2A]">
-              <Text className="text-white text-xs mr-1">Daily</Text>
-              <Ionicons name="chevron-down" size={14} color="#fff" />
+            <Text className="text-text font-semibold text-lg">Activities</Text>
+            <View className="flex-row items-center bg-surface rounded-full px-3 py-1.5 border border-border">
+              <Text className="text-text text-xs mr-1">Daily</Text>
+              <Ionicons name="chevron-down" size={14} color={colors.text} />
             </View>
           </View>
 
-          <View className="bg-[#1A1A1A] rounded-2xl p-4 mb-6">
+          <View className="bg-surface rounded-2xl p-4 mb-6">
             <EnergyBar data={WEEK_DATA} />
           </View>
 
-          <Text className="text-white font-semibold text-lg mb-2">
+          <Text className="text-text font-semibold text-lg mb-2">
             Device Power Consumption
           </Text>
           <View>

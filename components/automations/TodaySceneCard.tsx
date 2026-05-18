@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Scene } from '@/types';
+import { useTheme } from '@/hooks/useTheme';
 
 type Props = {
   scene: Scene;
@@ -8,25 +9,35 @@ type Props = {
 };
 
 export function TodaySceneCard({ scene, onPress }: Props) {
-  const isDark = scene.color === '#1A1A1A';
+  const { colors } = useTheme();
+  // Scenes flagged "#1A1A1A" are neutral cards — they follow the theme surface.
+  const neutral = scene.color === '#1A1A1A';
+  const bg = neutral ? colors.surface : scene.color;
+  const fg = neutral ? colors.text : '#fff';
+  const fgMuted = neutral ? colors.textSecondary : 'rgba(255,255,255,0.8)';
+  const iconBg = neutral ? colors.surfaceAlt : 'rgba(255,255,255,0.2)';
+
   return (
     <Pressable
       onPress={() => onPress?.(scene)}
       className="flex-1 rounded-2xl p-4"
-      style={{ backgroundColor: scene.color, minHeight: 150 }}
+      style={{ backgroundColor: bg, minHeight: 150 }}
     >
       <View
-        className={`w-10 h-10 rounded-full items-center justify-center ${isDark ? 'bg-[#242424]' : 'bg-white/20'}`}
+        className="w-10 h-10 rounded-full items-center justify-center"
+        style={{ backgroundColor: iconBg }}
       >
         <Ionicons
           name={scene.icon as keyof typeof Ionicons.glyphMap}
           size={20}
-          color="#fff"
+          color={fg}
         />
       </View>
       <View className="mt-auto">
-        <Text className="text-white font-semibold text-base">{scene.name}</Text>
-        <Text className="text-white/80 text-xs mt-1">
+        <Text className="font-semibold text-base" style={{ color: fg }}>
+          {scene.name}
+        </Text>
+        <Text className="text-xs mt-1" style={{ color: fgMuted }}>
           {scene.time} {scene.repeat}
         </Text>
       </View>

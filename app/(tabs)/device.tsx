@@ -8,29 +8,31 @@ import { DeviceCard } from '@/components/ui/DeviceCard';
 import { MoodSelector } from '@/components/device/MoodSelector';
 import { Button } from '@/components/ui/Button';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { useTheme } from '@/hooks/useTheme';
 
 type Mood = 'cool' | 'heat' | 'wind' | 'auto';
 
 export default function DeviceScreen() {
   const { open } = useSidebar();
+  const { colors } = useTheme();
   const { devices, toggleDevice } = useDevices();
   const [mood, setMood] = useState<Mood>('cool');
 
   const acDevices = devices.filter((d) => d.type === 'ac' || d.type === 'light').slice(0, 2);
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-3">
           <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color="#fff" />
+            <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
-          <Text className="text-white font-semibold text-lg">Device</Text>
+          <Text className="text-text font-semibold text-lg">Device</Text>
           <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            <Ionicons name="notifications-outline" size={24} color={colors.text} />
           </Pressable>
         </View>
 
@@ -39,14 +41,14 @@ export default function DeviceScreen() {
         </View>
 
         <View className="px-5 mt-2">
-          <Text className="text-white font-semibold text-lg mb-3">Devices</Text>
+          <Text className="text-text font-semibold text-lg mb-3">Devices</Text>
           <View className="flex-row gap-3 mb-6">
             {acDevices.map((d) => (
               <DeviceCard key={d.id} device={d} onToggle={toggleDevice} />
             ))}
           </View>
 
-          <Text className="text-white font-semibold text-lg mb-3">Select Mood</Text>
+          <Text className="text-text font-semibold text-lg mb-3">Select Mood</Text>
           <MoodSelector selected={mood} onSelect={setMood} />
 
           <View className="mt-8">

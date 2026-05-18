@@ -19,10 +19,10 @@ export function ConsumptionRow({ name, icon, iconColor, deviceCount, kwh }: Prop
         <Ionicons name={icon} size={22} color={iconColor} />
       </View>
       <View className="flex-1 ml-3">
-        <Text className="text-white font-semibold text-base">{name}</Text>
-        <Text className="text-[#8A8A8A] text-xs">{deviceCount} Devices</Text>
+        <Text className="text-text font-semibold text-base">{name}</Text>
+        <Text className="text-textSecondary text-xs">{deviceCount} Devices</Text>
       </View>
-      <Text className="text-white font-semibold">{kwh} kWh</Text>
+      <Text className="text-text font-semibold">{kwh} kWh</Text>
     </View>
   );
 }

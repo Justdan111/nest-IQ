@@ -1,4 +1,5 @@
 import { Pressable, View } from 'react-native';
+import { useTheme } from '@/hooks/useTheme';
 
 const COLORS = [
   '#3B6FF0',
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function ColorPicker({ selected, onSelect }: Props) {
+  const { colors } = useTheme();
   return (
     <View className="flex-row flex-wrap gap-3 justify-between">
       {COLORS.map((c) => {
@@ -25,8 +27,12 @@ export function ColorPicker({ selected, onSelect }: Props) {
           <Pressable
             key={c}
             onPress={() => onSelect(c)}
-            className={`w-14 h-14 rounded-full items-center justify-center ${active ? 'border-2 border-white' : ''}`}
-            style={{ backgroundColor: c }}
+            className="w-14 h-14 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: c,
+              borderWidth: active ? 2 : 0,
+              borderColor: colors.text,
+            }}
           />
         );
       })}

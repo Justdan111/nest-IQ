@@ -18,7 +18,10 @@ type ThemeValue = {
  */
 export function useTheme(): ThemeValue {
   const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme();
-  const scheme: Scheme = colorScheme === 'light' ? 'light' : 'dark';
+  // Match NativeWind's className resolution: it only applies the `.dark`
+  // class when the scheme is explicitly 'dark', so an undefined scheme
+  // resolves to light here too — keeping JS colors and classNames in sync.
+  const scheme: Scheme = colorScheme === 'dark' ? 'dark' : 'light';
 
   return {
     scheme,

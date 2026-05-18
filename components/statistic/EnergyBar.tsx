@@ -1,17 +1,19 @@
 import { View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
+import { useTheme } from '@/hooks/useTheme';
 
 type Props = {
   data: { value: number; label: string; active?: boolean }[];
 };
 
 export function EnergyBar({ data }: Props) {
+  const { colors } = useTheme();
   const bars = data.map((d) => ({
     value: d.value,
     label: d.label,
-    frontColor: d.active ? '#3B6FF0' : '#1A1A1A',
+    frontColor: d.active ? colors.primary : colors.surfaceAlt,
     topLabelComponent: d.active ? () => null : undefined,
-    labelTextStyle: { color: '#8A8A8A', fontSize: 11 },
+    labelTextStyle: { color: colors.textSecondary, fontSize: 11 },
   }));
 
   return (
@@ -27,7 +29,7 @@ export function EnergyBar({ data }: Props) {
         xAxisThickness={0}
         noOfSections={4}
         maxValue={120}
-        yAxisTextStyle={{ color: '#555555', fontSize: 10 }}
+        yAxisTextStyle={{ color: colors.textMuted, fontSize: 10 }}
         height={180}
         isAnimated
       />

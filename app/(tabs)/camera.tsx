@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { useTheme } from '@/hooks/useTheme';
 
 const CAMERAS = [
   { id: '1', room: 'Bed Room', floor: '2nd Floor', date: 'Today', time: '10:30 AM', active: true },
@@ -13,29 +14,30 @@ const CAMERAS = [
 
 export default function CameraScreen() {
   const { open } = useSidebar();
+  const { colors } = useTheme();
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#0A0A0A]">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="flex-row items-center justify-between px-5 pt-2 mb-4">
           <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color="#fff" />
+            <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
-          <Text className="text-white font-semibold text-lg">Real Time</Text>
+          <Text className="text-text font-semibold text-lg">Real Time</Text>
           <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            <Ionicons name="notifications-outline" size={24} color={colors.text} />
           </Pressable>
         </View>
 
         <View className="mx-5 rounded-2xl overflow-hidden mb-6">
           <View
-            style={{ height: 220, backgroundColor: '#1A1A1A' }}
+            style={{ height: 220, backgroundColor: colors.surface }}
             className="items-center justify-center"
           >
             <Ionicons name="videocam" size={48} color="#3B6FF0" />
-            <Text className="text-[#8A8A8A] text-sm mt-2">Live Feed</Text>
+            <Text className="text-textSecondary text-sm mt-2">Live Feed</Text>
 
             <View className="absolute top-3 left-3 bg-black/60 rounded-md px-2 py-1">
               <Text className="text-white text-xs">REC ● LIVE</Text>
@@ -52,22 +54,34 @@ export default function CameraScreen() {
             {CAMERAS.map((c) => (
               <Pressable
                 key={c.id}
-                className={`rounded-2xl p-4 flex-row items-center ${c.active ? 'bg-[#3B6FF0]' : 'bg-[#1A1A1A]'}`}
+                className={`rounded-2xl p-4 flex-row items-center ${c.active ? 'bg-primary' : 'bg-surface'}`}
               >
                 <View
-                  className={`w-14 h-14 rounded-xl items-center justify-center ${c.active ? 'bg-white/20' : 'bg-[#242424]'}`}
+                  className={`w-14 h-14 rounded-xl items-center justify-center ${c.active ? 'bg-white/20' : 'bg-surfaceAlt'}`}
                 >
-                  <Ionicons name="videocam-outline" size={22} color="#fff" />
+                  <Ionicons
+                    name="videocam-outline"
+                    size={22}
+                    color={c.active ? '#fff' : colors.text}
+                  />
                 </View>
                 <View className="flex-1 ml-3">
-                  <Text className="text-white font-semibold text-base">{c.room}</Text>
                   <Text
-                    className={`text-xs mt-0.5 ${c.active ? 'text-white/80' : 'text-[#8A8A8A]'}`}
+                    className={`font-semibold text-base ${c.active ? 'text-white' : 'text-text'}`}
+                  >
+                    {c.room}
+                  </Text>
+                  <Text
+                    className={`text-xs mt-0.5 ${c.active ? 'text-white/80' : 'text-textSecondary'}`}
                   >
                     {c.floor} • {c.date} • {c.time}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={c.active ? '#fff' : '#8A8A8A'} />
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={c.active ? '#fff' : colors.textSecondary}
+                />
               </Pressable>
             ))}
           </View>
