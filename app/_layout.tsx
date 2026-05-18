@@ -12,8 +12,10 @@ import {
   useFonts,
 } from '@expo-google-fonts/poppins';
 import { View } from 'react-native';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function RootLayout() {
+  const { colors } = useTheme();
   const [loaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -22,17 +24,17 @@ export default function RootLayout() {
   });
 
   if (!loaded) {
-    return <View style={{ flex: 1, backgroundColor: '#0A0A0A' }} />;
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
+        <StatusBar style="auto" />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#0A0A0A' },
+            contentStyle: { backgroundColor: colors.background },
             animation: 'fade',
           }}
         />

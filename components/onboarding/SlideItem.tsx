@@ -22,9 +22,15 @@ type Props = {
 export function SlideItem({ slide, index, footer }: Props) {
   const Body = (
     <SafeAreaView className="flex-1 justify-end" style={{ width, height }}>
+      {/* Top scrim — keeps the white "Skip" button legible on bright photos. */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.85)']}
-        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' }}
+        colors={['rgba(0,0,0,0.55)', 'transparent']}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 160 }}
+      />
+      {/* Bottom scrim — anchors the title/subtitle text. */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.45)', 'rgba(0,0,0,0.92)']}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '65%' }}
       />
       <Animated.View
         key={`s-${index}`}
@@ -51,11 +57,7 @@ export function SlideItem({ slide, index, footer }: Props) {
       <View className="absolute inset-0 items-center justify-center">
         <View className="flex-row flex-wrap" style={{ width: width * 0.7 }}>
           {[0, 1, 2, 3].map((i) => (
-            <View
-              key={i}
-              className="w-1/2 p-1"
-              style={{ height: width * 0.45 }}
-            >
+            <View key={i} className="w-1/2 p-1" style={{ height: width * 0.45 }}>
               <View
                 className="flex-1 rounded-2xl"
                 style={{

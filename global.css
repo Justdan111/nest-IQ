@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme tokens — RGB channels consumed by tailwind.config.js.
+   `:root` is the light theme, `.dark` overrides it for dark theme.
+   NativeWind toggles the `.dark` class from useColorScheme. */
+@layer base {
+  :root {
+    --color-background: 244 246 250;
+    --color-surface: 255 255 255;
+    --color-surface-alt: 237 240 245;
+    --color-border: 226 230 236;
+    --color-text: 17 20 28;
+    --color-text-secondary: 110 116 128;
+    --color-text-muted: 166 171 181;
+  }
+
+  .dark:root {
+    --color-background: 10 10 10;
+    --color-surface: 26 26 26;
+    --color-surface-alt: 36 36 36;
+    --color-border: 42 42 42;
+    --color-text: 255 255 255;
+    --color-text-secondary: 138 138 138;
+    --color-text-muted: 85 85 85;
+  }
+}

@@ -21,7 +21,7 @@ const SLIDES: Slide[] = [
     title: 'Convenience',
     subtitle:
       'Control every device in your home from the palm of your hand — anywhere, anytime.',
-    bg: null,
+    bg: require('@/assets/images/onboard-1.png'),
     bgColor: '#1F2A4A',
   },
   {
@@ -29,7 +29,7 @@ const SLIDES: Slide[] = [
     title: 'Stay informed',
     subtitle:
       'Get real-time updates and alerts about your home, energy, and security.',
-    bg: null,
+    bg: require('@/assets/images/onboard-2.png'),
     bgColor: '#3A2530',
   },
   {
@@ -37,7 +37,7 @@ const SLIDES: Slide[] = [
     title: 'Automate',
     subtitle:
       'Build powerful routines that run themselves — wake up, leave, sleep.',
-    bg: null,
+    bg: require('@/assets/images/onboard-3.png'),
     bgColor: '#222F22',
   },
 ];
