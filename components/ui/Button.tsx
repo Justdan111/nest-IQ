@@ -23,12 +23,12 @@ export function Button({
 }: Props) {
   const base = 'rounded-full py-4 items-center justify-center flex-row';
   const styles: Record<Variant, { bg: string; text: string }> = {
-    primary: { bg: 'bg-[#3B6FF0] active:bg-[#2952C8]', text: 'text-white' },
+    primary: { bg: 'bg-primary active:bg-primaryDark', text: 'text-white' },
     outline: {
-      bg: 'border border-[#3B6FF0] bg-transparent active:bg-[#3B6FF0]/10',
-      text: 'text-[#3B6FF0]',
+      bg: 'border border-primary bg-transparent active:bg-primary/10',
+      text: 'text-primary',
     },
-    ghost: { bg: 'bg-transparent', text: 'text-white' },
+    ghost: { bg: 'bg-transparent', text: 'text-text' },
   };
 
   return (

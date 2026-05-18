@@ -6,7 +6,7 @@ type Props = ViewProps & {
 };
 
 export function Card({ active, className = '', style, children, ...rest }: Props) {
-  const bg = active ? 'bg-[#3B6FF0]' : 'bg-[#1A1A1A]';
+  const bg = active ? 'bg-primary' : 'bg-surface';
   return (
     <View
       className={`${bg} rounded-2xl p-4 ${className}`}

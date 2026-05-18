@@ -25,10 +25,10 @@ export function BottomSheet({ visible, onClose, children }: Props) {
           <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
-            className="bg-[#1A1A1A] rounded-t-3xl px-5 pt-4 pb-8"
+            className="bg-surface rounded-t-3xl px-5 pt-4 pb-8"
           >
             <View className="items-center mb-3">
-              <View className="w-10 h-1 rounded-full bg-[#2A2A2A]" />
+              <View className="w-10 h-1 rounded-full bg-border" />
             </View>
             <SafeAreaView edges={['bottom']}>{children}</SafeAreaView>
           </Animated.View>
