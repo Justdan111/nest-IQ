@@ -27,7 +27,7 @@ export default function HomeSetupIntroScreen() {
       </SafeAreaView>
 
       <Image
-        source={require('@/assets/images/onboard-2.png')}
+        source={require('@/assets/images/setup.png')}
         resizeMode="cover"
         style={{ width: '100%', height: 240 }}
       />
