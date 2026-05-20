@@ -106,7 +106,7 @@ export default function SignUpScreen() {
               label="Get Started"
               onPress={() => {
                 setShowCongrats(false);
-                router.replace('/(tabs)');
+                router.replace('/(auth)/home-setup');
               }}
             />
           </View>
