@@ -32,12 +32,16 @@ export function RoomCard({ room, onPress }: Props) {
         <Image
           source={room.image}
           resizeMode="contain"
+          // `multiply` makes the JPG's white background drop into the card's
+          // pastel tint while the dark furniture stays itself (and picks up a
+          // subtle hue from the room color).
           style={{
             position: 'absolute',
             top: 8,
             right: 4,
             width: 92,
             height: 84,
+            mixBlendMode: 'multiply',
           }}
         />
       ) : null}

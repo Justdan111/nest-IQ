@@ -37,7 +37,7 @@ export const ROOMS: Room[] = [
     subtitle: 'Two rooms',
     deviceCount: 2,
     totalDevices: 5,
-    image: require('@/assets/images/bed-1.jpg'),
+    image: require('@/assets/images/bed-1.png'),
     tintColor: '#EDEDED',
     blobColor: '#DDDDDD',
   },
