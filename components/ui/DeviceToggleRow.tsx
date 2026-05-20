@@ -1,9 +1,7 @@
-import { Pressable, Switch, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import type { Device } from '@/types';
-import { useTheme } from '@/hooks/useTheme';
 
 type Props = {
   device: Device;
@@ -11,8 +9,12 @@ type Props = {
   onPress?: (device: Device) => void;
 };
 
+/**
+ * Wide device row: name + status on the left, labeled On/Off pill toggle on
+ * the right. No leading icon — the row is intentionally minimal to match the
+ * mockup. Active state recolors the row to primary blue.
+ */
 export function DeviceToggleRow({ device, onToggle, onPress }: Props) {
-  const { colors } = useTheme();
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -21,39 +23,56 @@ export function DeviceToggleRow({ device, onToggle, onPress }: Props) {
   }, [device.isOn, scale]);
 
   const active = device.isOn;
-  const iconColor = active ? '#fff' : colors.text;
 
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={() => onPress?.(device)}
-        className={`${active ? 'bg-primary' : 'bg-surface'} rounded-2xl p-4 flex-row items-center`}
+        className={`${active ? 'bg-primary' : 'bg-surface'} rounded-2xl p-5 flex-row items-center`}
       >
-        <View
-          className={`w-11 h-11 rounded-full items-center justify-center ${active ? 'bg-white/20' : 'bg-surfaceAlt'}`}
-        >
-          <Ionicons
-            name={device.icon as keyof typeof Ionicons.glyphMap}
-            size={22}
-            color={iconColor}
-          />
-        </View>
-        <View className="flex-1 ml-3">
+        <View className="flex-1">
           <Text className={`font-semibold text-base ${active ? 'text-white' : 'text-text'}`}>
             {device.name}
           </Text>
-          <Text className={`text-xs ${active ? 'text-white/80' : 'text-textSecondary'}`}>
+          <Text className={`text-xs mt-1 ${active ? 'text-white/80' : 'text-textSecondary'}`}>
             {device.status}
           </Text>
         </View>
-        <Switch
-          value={device.isOn}
-          onValueChange={() => onToggle(device.id)}
-          trackColor={{ true: 'rgba(255,255,255,0.25)', false: colors.surfaceAlt }}
-          thumbColor={device.isOn ? '#FFFFFF' : colors.textSecondary}
-          ios_backgroundColor={active ? 'rgba(255,255,255,0.25)' : colors.surfaceAlt}
-        />
+        <LabeledToggle value={device.isOn} onPress={() => onToggle(device.id)} />
       </Pressable>
     </Animated.View>
+  );
+}
+
+function LabeledToggle({ value, onPress }: { value: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        width: 64,
+        height: 32,
+        borderRadius: 10,
+        backgroundColor: 'rgba(0,0,0,0.28)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: value ? 'flex-end' : 'flex-start',
+        paddingHorizontal: 4,
+      }}
+    >
+      {value ? (
+        <Text className="text-white text-[11px] font-semibold mr-1">On</Text>
+      ) : null}
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 6,
+          backgroundColor: '#FFFFFF',
+        }}
+      />
+      {!value ? (
+        <Text className="text-white text-[11px] font-semibold ml-1">Off</Text>
+      ) : null}
+    </Pressable>
   );
 }

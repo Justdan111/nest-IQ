@@ -49,7 +49,7 @@ export default function CameraScreen() {
         </View>
 
         <View className="px-5">
-          <SectionHeader title="Cameras" actionLabel="+ Add New" />
+          <SectionHeader title="Cameras" actionLabel="Add New" actionVariant="pill" />
           <View className="gap-3">
             {CAMERAS.map((c) => (
               <Pressable

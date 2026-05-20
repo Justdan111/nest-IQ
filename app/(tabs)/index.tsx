@@ -23,7 +23,7 @@ export default function HomeScreen() {
         <HomeHeader name={user.name} />
 
         <View className="px-5">
-          <SectionHeader title="My Rooms" actionLabel="+ Add New" />
+          <SectionHeader title="My rooms" actionLabel="Add New" actionVariant="pill" />
           <FlatList
             data={ROOMS}
             keyExtractor={(r) => r.id}

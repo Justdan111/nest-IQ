@@ -38,7 +38,8 @@ export default function AutomationsScreen() {
         <View className="px-5">
           <SectionHeader
             title="Scenes"
-            actionLabel="+ Add New"
+            actionLabel="Add New"
+            actionVariant="pill"
             onAction={() => setShowAddScene(true)}
           />
           {SUGGESTED_SCENES.map((s) => (
@@ -53,7 +54,7 @@ export default function AutomationsScreen() {
         </View>
 
         <View className="px-5 mt-6">
-          <SectionHeader title="Today's Scenes" actionLabel="+ Add New" />
+          <SectionHeader title="Today's Scenes" actionLabel="Add New" actionVariant="pill" />
           <FlatList
             data={SCENES}
             keyExtractor={(s) => s.id}

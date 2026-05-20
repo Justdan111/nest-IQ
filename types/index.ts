@@ -14,8 +14,14 @@ export interface Room {
   name: string;
   deviceCount: number;
   totalDevices: number;
+  /** Furniture cut-out (bed / chair) shown in the room card's top-right. */
   image: any;
+  /** Pastel card background. */
   tintColor: string;
+  /** Lighter spotlight circle that sits behind the image. */
+  blobColor: string;
+  /** Display string shown beneath the room name, e.g. "Five rooms". */
+  subtitle: string;
 }
 
 export interface Scene {

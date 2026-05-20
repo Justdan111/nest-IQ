@@ -19,9 +19,9 @@ export function HomeHeader({ name, onMenu, onBell }: Props) {
           <Ionicons name="menu" size={26} color={colors.text} />
         </Pressable>
         <Pressable onPress={onBell} hitSlop={10}>
-          <View>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
-            <View className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-error" />
+          <View className="w-10 h-10 rounded-full bg-surface items-center justify-center">
+            <Ionicons name="notifications-outline" size={20} color={colors.text} />
+            <View className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-error" />
           </View>
         </Pressable>
       </View>
