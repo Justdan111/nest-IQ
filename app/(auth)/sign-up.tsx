@@ -82,6 +82,12 @@ export default function SignUpScreen() {
         <View className="mt-8">
           <Button label="Sign Up" onPress={submit} disabled={!accept} />
         </View>
+        <View className="flex-row items-center justify-center mt-4">
+          <Text className="text-textSecondary text-sm">Already have an account?</Text>
+          <Pressable onPress={() => router.push('/(auth)/sign-in')} hitSlop={10}>
+            <Text className="text-primary text-sm font-medium ml-1">Sign In</Text>
+          </Pressable>
+        </View>
       </ScrollView>
 
       <BottomSheet visible={showCongrats} onClose={() => setShowCongrats(false)}>
@@ -155,12 +161,12 @@ function PhoneField({ value, onChange }: { value: string; onChange: (v: string) 
       <Text className="text-textSecondary text-sm mb-2">Phone Number</Text>
       <View className="flex-row items-center bg-surface border border-border rounded-xl pr-4">
         <View className="flex-row items-center pl-4 pr-3 border-r border-border py-3">
-          <Text className="text-text text-base">🇺🇸 +1</Text>
+          <Text className="text-text text-base"> 🇳🇬  +234</Text>
         </View>
         <TextInput
           value={value}
           onChangeText={onChange}
-          placeholder="555 123 4567"
+          placeholder="903 9345 678"
           placeholderTextColor={colors.textMuted}
           keyboardType="phone-pad"
           className="flex-1 text-text py-3 text-base ml-3"

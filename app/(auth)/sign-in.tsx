@@ -60,6 +60,12 @@ export default function SignInScreen() {
         <View className="mt-10">
           <Button label="Sign In" onPress={() => router.replace('/(tabs)')} />
         </View>
+        <View className="flex-row items-center justify-center mt-4">
+          <Text className="text-textSecondary text-sm">Don't have an account?</Text>
+          <Pressable onPress={() => router.push('/(auth)/sign-up')} hitSlop={10}>
+            <Text className="text-primary text-sm font-medium ml-1">Sign Up</Text>
+          </Pressable>
+        </View>
 
         <View className="flex-row items-center my-8">
           <View className="flex-1 h-px bg-border" />
