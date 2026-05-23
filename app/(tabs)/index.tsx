@@ -16,10 +16,7 @@ export default function HomeScreen() {
 
   const frequentlyUsed = devices.slice(0, 4);
 
-  const goToDeviceList = (room?: string) =>
-    router.push(
-      room ? { pathname: '/device-list', params: { room } } : '/device-list',
-    );
+  const goToRooms = () => router.push('/rooms');
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
@@ -34,7 +31,7 @@ export default function HomeScreen() {
             title="My rooms"
             actionLabel="Add New"
             actionVariant="pill"
-            onAction={() => goToDeviceList()}
+            onAction={goToRooms}
           />
           <FlatList
             data={ROOMS}
@@ -43,7 +40,7 @@ export default function HomeScreen() {
             scrollEnabled={false}
             columnWrapperStyle={{ gap: 12, marginBottom: 12 }}
             renderItem={({ item }) => (
-              <RoomCard room={item} onPress={(r) => goToDeviceList(r.name)} />
+              <RoomCard room={item} onPress={goToRooms} />
             )}
           />
         </View>
