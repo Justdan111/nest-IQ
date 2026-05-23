@@ -1,4 +1,11 @@
-import { useState } from 'react';
+import {
+  createContext,
+  createElement,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { User } from '@/types';
 
 const DEFAULT_USER: User = {
@@ -9,14 +16,29 @@ const DEFAULT_USER: User = {
   address: '742 Evergreen Terrace',
 };
 
-export function useAppState() {
+type AppStateContextValue = {
+  user: User;
+  setUser: (u: User) => void;
+  awayMode: boolean;
+  setAwayMode: (b: boolean) => void;
+};
+
+const AppStateContext = createContext<AppStateContextValue | null>(null);
+
+export function AppStateProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(DEFAULT_USER);
   const [awayMode, setAwayMode] = useState(false);
 
-  return {
-    user,
-    setUser,
-    awayMode,
-    setAwayMode,
-  };
+  const value = useMemo<AppStateContextValue>(
+    () => ({ user, setUser, awayMode, setAwayMode }),
+    [user, awayMode],
+  );
+
+  return createElement(AppStateContext.Provider, { value }, children);
+}
+
+export function useAppState() {
+  const ctx = useContext(AppStateContext);
+  if (!ctx) throw new Error('useAppState must be used within an AppStateProvider');
+  return ctx;
 }

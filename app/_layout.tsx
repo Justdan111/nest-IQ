@@ -13,6 +13,9 @@ import {
 } from '@expo-google-fonts/poppins';
 import { View } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
+import { AppStateProvider } from '@/hooks/useAppState';
+import { DevicesProvider } from '@/hooks/useDevices';
+import { RoomsProvider } from '@/hooks/useRooms';
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -30,14 +33,20 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
-        <StatusBar style="auto" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-            animation: 'fade',
-          }}
-        />
+        <AppStateProvider>
+          <RoomsProvider>
+            <DevicesProvider>
+              <StatusBar style="auto" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.background },
+                  animation: 'fade',
+                }}
+              />
+            </DevicesProvider>
+          </RoomsProvider>
+        </AppStateProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

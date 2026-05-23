@@ -1,8 +1,25 @@
-import { useCallback, useMemo, useState } from 'react';
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { DEVICES } from '@/constants/Devices';
 import type { Device } from '@/types';
 
-export function useDevices() {
+type DevicesContextValue = {
+  devices: Device[];
+  toggleDevice: (id: string) => void;
+  devicesByRoom: Record<string, Device[]>;
+  activeCount: number;
+};
+
+const DevicesContext = createContext<DevicesContextValue | null>(null);
+
+export function DevicesProvider({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<Device[]>(DEVICES);
 
   const toggleDevice = useCallback((id: string) => {
@@ -33,5 +50,16 @@ export function useDevices() {
     [devices],
   );
 
-  return { devices, toggleDevice, devicesByRoom, activeCount };
+  const value = useMemo<DevicesContextValue>(
+    () => ({ devices, toggleDevice, devicesByRoom, activeCount }),
+    [devices, toggleDevice, devicesByRoom, activeCount],
+  );
+
+  return createElement(DevicesContext.Provider, { value }, children);
+}
+
+export function useDevices() {
+  const ctx = useContext(DevicesContext);
+  if (!ctx) throw new Error('useDevices must be used within a DevicesProvider');
+  return ctx;
 }
