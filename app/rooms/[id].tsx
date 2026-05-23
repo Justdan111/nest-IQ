@@ -3,8 +3,8 @@ import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ROOMS, ROOM_NAMES } from '@/constants/Rooms';
 import { useDevices } from '@/hooks/useDevices';
+import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
 import { RoomFilterPills } from '@/components/ui/RoomFilterPill';
 import { DeviceCard } from '@/components/ui/DeviceCard';
@@ -33,10 +33,12 @@ export default function RoomDetailsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { devices, toggleDevice } = useDevices();
+  const { rooms } = useRooms();
   const params = useLocalSearchParams<{ id: string }>();
 
-  const room = ROOMS.find((r) => r.id === params.id) ?? ROOMS[0];
+  const room = rooms.find((r) => r.id === params.id) ?? rooms[0];
   const roomDevices = devices.filter((d) => d.room === room.name);
+  const roomNames = rooms.map((r) => r.name);
 
   const [selectedPill, setSelectedPill] = useState<string>(room.name);
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -72,10 +74,10 @@ export default function RoomDetailsScreen() {
       >
         <View className="mb-5 mt-1">
           <RoomFilterPills
-            rooms={ROOM_NAMES}
+            rooms={roomNames}
             selected={selectedPill}
             onSelect={(name) => {
-              const target = ROOMS.find((r) => r.name === name);
+              const target = rooms.find((r) => r.name === name);
               if (target && target.id !== room.id) {
                 router.replace(`/rooms/${target.id}`);
               } else {

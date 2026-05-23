@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppState } from '@/hooks/useAppState';
 import { useDevices } from '@/hooks/useDevices';
-import { ROOMS } from '@/constants/Rooms';
+import { useRooms } from '@/hooks/useRooms';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { RoomCard } from '@/components/ui/RoomCard';
@@ -13,6 +13,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAppState();
   const { devices, toggleDevice } = useDevices();
+  const { rooms } = useRooms();
 
   const frequentlyUsed = devices.slice(0, 4);
 
@@ -34,7 +35,7 @@ export default function HomeScreen() {
             onAction={goToRooms}
           />
           <FlatList
-            data={ROOMS}
+            data={rooms}
             keyExtractor={(r) => r.id}
             numColumns={2}
             scrollEnabled={false}

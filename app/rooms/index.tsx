@@ -11,8 +11,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ROOMS, ROOM_NAMES } from '@/constants/Rooms';
 import { useDevices } from '@/hooks/useDevices';
+import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
 import { RoomFilterPills } from '@/components/ui/RoomFilterPill';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -46,9 +46,10 @@ export default function RoomsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { devices } = useDevices();
+  const { rooms, addRoom } = useRooms();
 
-  const [rooms, setRooms] = useState<Room[]>(ROOMS);
-  const [selectedPill, setSelectedPill] = useState<string>(ROOM_NAMES[0]);
+  const roomNames = rooms.map((r) => r.name);
+  const [selectedPill, setSelectedPill] = useState<string>(roomNames[0] ?? '');
 
   const [step, setStep] = useState<Step>(null);
   const [roomName, setRoomName] = useState('');
@@ -64,17 +65,16 @@ export default function RoomsScreen() {
   const close = () => setStep(null);
 
   const finalize = () => {
-    const newRoom: Room = {
-      id: `r-${Date.now()}`,
+    addRoom({
       name: roomName.trim(),
       subtitle: `${types.length} devices`,
       deviceCount: 0,
       totalDevices: types.length,
-      image: photos.length > 0 ? PHOTO_OPTIONS[photos[0]] : ROOMS[0].image,
+      image:
+        photos.length > 0 ? PHOTO_OPTIONS[photos[0]] : rooms[0]?.image ?? null,
       tintColor: '#E8F0FD',
       blobColor: '#D1E0F8',
-    };
-    setRooms((prev) => [...prev, newRoom]);
+    });
     setStep('success');
   };
 
@@ -97,7 +97,7 @@ export default function RoomsScreen() {
 
       <View className="mb-4 mt-1">
         <RoomFilterPills
-          rooms={ROOM_NAMES}
+          rooms={roomNames}
           selected={selectedPill}
           onSelect={setSelectedPill}
         />
