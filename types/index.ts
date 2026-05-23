@@ -5,23 +5,32 @@ export interface Device {
   status: 'Connected' | 'Disconnected';
   isOn: boolean;
   kwhPerHour: number;
+  /** Matches a {@link Room} by its specific name, not by category. */
   room: string;
   type?: 'ac' | 'light' | 'fan' | 'speaker' | 'camera' | 'lock';
 }
 
-export interface Room {
+export interface Category {
   id: string;
   name: string;
-  deviceCount: number;
-  totalDevices: number;
-  /** Furniture cut-out (bed / chair) shown in the room card's top-right. */
-  image: any;
-  /** Pastel card background. */
+  /** Cutout / hero image shown on the Home category card. May be null for user-added categories. */
+  image: any | null;
+  /** Pastel card background for the Home grid. */
   tintColor: string;
-  /** Lighter spotlight circle that sits behind the image. */
+  /** Lighter spotlight circle behind the category image. */
   blobColor: string;
-  /** Display string shown beneath the room name, e.g. "Five rooms". */
-  subtitle: string;
+}
+
+export type RoomMedia = { uri: string; type: 'image' | 'video' };
+
+export interface Room {
+  id: string;
+  categoryId: string;
+  name: string;
+  /** Hero photo of the room (real interior shot). */
+  image: any;
+  /** User-uploaded gallery (camera roll / library / camera capture). */
+  media?: RoomMedia[];
 }
 
 export interface Scene {

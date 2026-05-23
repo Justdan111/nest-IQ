@@ -1,46 +1,77 @@
-import type { Room } from '@/types';
+import type { Category, Room } from '@/types';
 
-export const ROOMS: Room[] = [
+export const CATEGORIES: Category[] = [
   {
-    id: '1',
+    id: 'bed',
     name: 'Bed Room',
-    subtitle: 'Five rooms',
-    deviceCount: 5,
-    totalDevices: 8,
-    image: require('@/assets/images/bed-2.jpg'),
+    image: require('@/assets/images/bedroom-01.jpg'),
     tintColor: '#FDE8E8',
     blobColor: '#F7D2D2',
   },
   {
-    id: '2',
+    id: 'living',
     name: 'Living Room',
-    subtitle: 'Two rooms',
-    deviceCount: 2,
-    totalDevices: 6,
-    image: require('@/assets/images/chair-1.jpg'),
+    image: require('@/assets/images/livingroom.jpg'),
     tintColor: '#E8F0FD',
     blobColor: '#D1E0F8',
   },
   {
-    id: '3',
-    name: 'Study Room',
-    subtitle: 'One rooms',
-    deviceCount: 1,
-    totalDevices: 4,
-    image: require('@/assets/images/chair-2.jpg'),
+    id: 'kitchen',
+    name: 'Kitchen',
+    image: require('@/assets/images/kitchen.jpg'),
     tintColor: '#FDF6E8',
     blobColor: '#F8E7BD',
   },
   {
-    id: '4',
-    name: 'Guest Room',
-    subtitle: 'Two rooms',
-    deviceCount: 2,
-    totalDevices: 5,
-    image: require('@/assets/images/bed-1.png'),
+    id: 'dining',
+    name: 'Dining Room',
+    image: require('@/assets/images/dinning.jpg'),
     tintColor: '#EDEDED',
     blobColor: '#DDDDDD',
   },
 ];
 
-export const ROOM_NAMES = ROOMS.map((r) => r.name);
+export const ROOMS: Room[] = [
+  {
+    id: '1',
+    categoryId: 'bed',
+    name: 'Master Bedroom',
+    image: require('@/assets/images/bedroom-01.jpg'),
+  },
+  {
+    id: '2',
+    categoryId: 'bed',
+    name: 'Edamame Bedroom',
+    image: require('@/assets/images/bedroom-02.jpg'),
+  },
+  {
+    id: '3',
+    categoryId: 'bed',
+    name: 'Kids Room',
+    image: require('@/assets/images/bedroom-03.jpg'),
+  },
+  {
+    id: '4',
+    categoryId: 'living',
+    name: 'Main Living Room',
+    image: require('@/assets/images/livingroom.jpg'),
+  },
+  {
+    id: '5',
+    categoryId: 'kitchen',
+    name: 'Main Kitchen',
+    image: require('@/assets/images/kitchen.jpg'),
+  },
+  {
+    id: '6',
+    categoryId: 'kitchen',
+    name: 'Pantry',
+    image: require('@/assets/images/kitchen-2.jpg'),
+  },
+  {
+    id: '7',
+    categoryId: 'dining',
+    name: 'Main Dining',
+    image: require('@/assets/images/dinning.jpg'),
+  },
+];

@@ -1,19 +1,22 @@
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDevices } from '@/hooks/useDevices';
 import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
-import { RoomFilterPills } from '@/components/ui/RoomFilterPill';
 import { DeviceCard } from '@/components/ui/DeviceCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SuccessModal } from '@/components/ui/SuccessModal';
+import { ImageViewer } from '@/components/ui/ImageViewer';
+import type { RoomMedia } from '@/types';
 
 type DeviceStep = null | 'pick' | 'success';
+type MediaPanel = null | 'menu' | 'upload-source';
 
 const DEVICE_TYPES: {
   id: string;
@@ -33,15 +36,17 @@ export default function RoomDetailsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { devices, toggleDevice } = useDevices();
-  const { rooms } = useRooms();
+  const { rooms, addRoomMedia } = useRooms();
   const params = useLocalSearchParams<{ id: string }>();
 
   const room = rooms.find((r) => r.id === params.id) ?? rooms[0];
   const roomDevices = devices.filter((d) => d.room === room.name);
-  const roomNames = rooms.map((r) => r.name);
+  const media = room.media ?? [];
 
-  const [selectedPill, setSelectedPill] = useState<string>(room.name);
-  const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaPanel, setMediaPanel] = useState<MediaPanel>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
   const [step, setStep] = useState<DeviceStep>(null);
   const [pickedTypes, setPickedTypes] = useState<string[]>([]);
 
@@ -50,7 +55,59 @@ export default function RoomDetailsScreen() {
     setStep('pick');
   };
   const togglePick = (id: string) =>
-    setPickedTypes((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+    setPickedTypes((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
+    );
+
+  const handleView = () => {
+    setMediaPanel(null);
+    if (media.length === 0) {
+      // Fall back to showing the room's hero photo as a single item so the
+      // viewer always has something to render.
+      Alert.alert('No uploaded media', 'Add a photo or video first.');
+      return;
+    }
+    setViewerIndex(0);
+    setViewerOpen(true);
+  };
+
+  const pickFromLibrary = async () => {
+    setMediaPanel(null);
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow photo library access.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      quality: 0.8,
+      allowsMultipleSelection: true,
+    });
+    if (result.canceled) return;
+    const items: RoomMedia[] = result.assets.map((a) => ({
+      uri: a.uri,
+      type: a.type === 'video' ? 'video' : 'image',
+    }));
+    addRoomMedia(room.id, items);
+  };
+
+  const captureFromCamera = async () => {
+    setMediaPanel(null);
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow camera access.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images', 'videos'],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    const a = result.assets[0];
+    addRoomMedia(room.id, [
+      { uri: a.uri, type: a.type === 'video' ? 'video' : 'image' },
+    ]);
+  };
 
   return (
     <View className="flex-1 bg-background">
@@ -59,7 +116,9 @@ export default function RoomDetailsScreen() {
           <Pressable onPress={() => router.back()} hitSlop={10}>
             <Ionicons name="chevron-back" size={26} color={colors.text} />
           </Pressable>
-          <Text className="text-text font-semibold text-lg">{room.name}</Text>
+          <Text className="text-text font-semibold text-lg" numberOfLines={1}>
+            {room.name}
+          </Text>
           <Pressable hitSlop={10}>
             <View className="w-9 h-9 rounded-full bg-surface items-center justify-center">
               <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
@@ -72,33 +131,24 @@ export default function RoomDetailsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="mb-5 mt-1">
-          <RoomFilterPills
-            rooms={roomNames}
-            selected={selectedPill}
-            onSelect={(name) => {
-              const target = rooms.find((r) => r.name === name);
-              if (target && target.id !== room.id) {
-                router.replace(`/rooms/${target.id}`);
-              } else {
-                setSelectedPill(name);
-              }
-            }}
-          />
-        </View>
-
         <Pressable
-          onPress={() => setMediaOpen(true)}
-          className="mx-5 rounded-2xl overflow-hidden mb-6"
+          onPress={() => setMediaPanel('menu')}
+          className="mx-5 rounded-2xl overflow-hidden mb-6 mt-2"
         >
           <Image
             source={room.image}
             resizeMode="cover"
-            style={{ width: '100%', height: 180, backgroundColor: room.tintColor }}
+            style={{ width: '100%', height: 200 }}
           />
           <View className="absolute bottom-3 right-3 w-9 h-9 rounded-xl bg-black/50 items-center justify-center">
             <Ionicons name="camera-outline" size={18} color="#fff" />
           </View>
+          {media.length > 0 ? (
+            <View className="absolute top-3 left-3 bg-black/50 rounded-full px-2.5 py-1 flex-row items-center">
+              <Ionicons name="images" size={12} color="#fff" />
+              <Text className="text-white text-xs ml-1">{media.length}</Text>
+            </View>
+          ) : null}
         </Pressable>
 
         <View className="px-5">
@@ -132,29 +182,70 @@ export default function RoomDetailsScreen() {
         </View>
       </ScrollView>
 
-      <BottomSheet visible={mediaOpen} onClose={() => setMediaOpen(false)}>
+      {/* Media menu */}
+      <BottomSheet
+        visible={mediaPanel === 'menu'}
+        onClose={() => setMediaPanel(null)}
+      >
         <Text className="text-text font-semibold text-lg mb-4 text-center">
           Room Media
         </Text>
         <View className="gap-3">
           <MediaOption
             icon="images-outline"
-            label="View photos & videos"
-            onPress={() => setMediaOpen(false)}
+            label={
+              media.length > 0
+                ? `View photos & videos (${media.length})`
+                : 'View photos & videos'
+            }
+            onPress={handleView}
           />
           <MediaOption
             icon="add-circle-outline"
             label="Add photo or video"
-            onPress={() => setMediaOpen(false)}
+            onPress={() => setMediaPanel('upload-source')}
           />
           <MediaOption
             icon="videocam-outline"
             label="Live CCTV feed"
-            onPress={() => setMediaOpen(false)}
+            onPress={() => {
+              setMediaPanel(null);
+              Alert.alert('Live feed', 'CCTV streaming is not yet connected.');
+            }}
           />
         </View>
       </BottomSheet>
 
+      {/* Upload source picker */}
+      <BottomSheet
+        visible={mediaPanel === 'upload-source'}
+        onClose={() => setMediaPanel(null)}
+      >
+        <View className="flex-row items-center justify-center mb-4">
+          <Pressable
+            onPress={() => setMediaPanel('menu')}
+            hitSlop={10}
+            className="absolute left-0"
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.text} />
+          </Pressable>
+          <Text className="text-text font-semibold text-lg">Add Media</Text>
+        </View>
+        <View className="gap-3">
+          <MediaOption
+            icon="image-outline"
+            label="Choose from Library"
+            onPress={pickFromLibrary}
+          />
+          <MediaOption
+            icon="camera-outline"
+            label="Take Photo or Video"
+            onPress={captureFromCamera}
+          />
+        </View>
+      </BottomSheet>
+
+      {/* Add Device flow */}
       <BottomSheet visible={step === 'pick'} onClose={() => setStep(null)}>
         <View className="flex-row items-center justify-center mb-5">
           <Pressable
@@ -221,6 +312,13 @@ export default function RoomDetailsScreen() {
         }
         ctaLabel="Done"
         onClose={() => setStep(null)}
+      />
+
+      <ImageViewer
+        visible={viewerOpen}
+        items={media}
+        initialIndex={viewerIndex}
+        onClose={() => setViewerOpen(false)}
       />
     </View>
   );

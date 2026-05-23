@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -9,18 +9,17 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDevices } from '@/hooks/useDevices';
 import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
-import { RoomFilterPills } from '@/components/ui/RoomFilterPill';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SuccessModal } from '@/components/ui/SuccessModal';
-import type { Room } from '@/types';
+import type { Category, Room } from '@/types';
 
-type Step = null | 'name' | 'photos' | 'devices' | 'success';
+type Step = null | 'name' | 'category' | 'photos' | 'devices' | 'success';
 
 const DEVICE_TYPES: {
   id: string;
@@ -37,43 +36,52 @@ const DEVICE_TYPES: {
 ];
 
 const PHOTO_OPTIONS = [
-  require('@/assets/images/chair-1.jpg'),
-  require('@/assets/images/chair-2.jpg'),
-  require('@/assets/images/bed-2.jpg'),
+  require('@/assets/images/bedroom-01.jpg'),
+  require('@/assets/images/livingroom.jpg'),
+  require('@/assets/images/kitchen.jpg'),
 ];
 
 export default function RoomsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { devices } = useDevices();
-  const { rooms, addRoom } = useRooms();
+  const { rooms, categories, addRoom, addCategory } = useRooms();
+  const params = useLocalSearchParams<{ category?: string }>();
 
-  const roomNames = rooms.map((r) => r.name);
-  const [selectedPill, setSelectedPill] = useState<string>(roomNames[0] ?? '');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    params.category ?? categories[0]?.id ?? '',
+  );
 
+  const filteredRooms = useMemo(
+    () => rooms.filter((r) => r.categoryId === selectedCategoryId),
+    [rooms, selectedCategoryId],
+  );
+
+  // Add-category modal
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Add-room multi-step flow
   const [step, setStep] = useState<Step>(null);
   const [roomName, setRoomName] = useState('');
+  const [roomCategory, setRoomCategory] = useState<string>(selectedCategoryId);
   const [photos, setPhotos] = useState<number[]>([]);
   const [types, setTypes] = useState<string[]>([]);
 
-  const open = () => {
+  const openAddRoom = () => {
     setRoomName('');
+    setRoomCategory(selectedCategoryId);
     setPhotos([]);
     setTypes([]);
     setStep('name');
   };
-  const close = () => setStep(null);
+  const closeAddRoom = () => setStep(null);
 
   const finalize = () => {
     addRoom({
+      categoryId: roomCategory,
       name: roomName.trim(),
-      subtitle: `${types.length} devices`,
-      deviceCount: 0,
-      totalDevices: types.length,
-      image:
-        photos.length > 0 ? PHOTO_OPTIONS[photos[0]] : rooms[0]?.image ?? null,
-      tintColor: '#E8F0FD',
-      blobColor: '#D1E0F8',
+      image: photos.length > 0 ? PHOTO_OPTIONS[photos[0]] : PHOTO_OPTIONS[0],
     });
     setStep('success');
   };
@@ -82,6 +90,15 @@ export default function RoomsScreen() {
     setPhotos((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
   const toggleType = (id: string) =>
     setTypes((t) => (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]));
+
+  const submitNewCategory = () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    const created = addCategory(name);
+    setShowAddCategory(false);
+    setNewCategoryName('');
+    setSelectedCategoryId(created.id);
+  };
 
   return (
     <View className="flex-1 bg-background">
@@ -95,48 +112,100 @@ export default function RoomsScreen() {
         </View>
       </SafeAreaView>
 
-      <View className="mb-4 mt-1">
-        <RoomFilterPills
-          rooms={roomNames}
-          selected={selectedPill}
-          onSelect={setSelectedPill}
-        />
-      </View>
+      <CategoryPills
+        categories={categories}
+        selectedId={selectedCategoryId}
+        onSelect={setSelectedCategoryId}
+        onAdd={() => {
+          setNewCategoryName('');
+          setShowAddCategory(true);
+        }}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 20 }}
       >
-        {rooms.map((r) => {
-          const inRoom = devices.filter((d) => d.room === r.name);
-          const onCount = inRoom.filter((d) => d.isOn).length;
-          const totalCount = inRoom.length || r.totalDevices;
-          return (
-            <RoomListItem
-              key={r.id}
-              room={r}
-              onCount={onCount}
-              totalCount={totalCount}
-              onPress={() => router.push(`/rooms/${r.id}`)}
-            />
-          );
-        })}
+        {filteredRooms.length === 0 ? (
+          <View className="bg-surface rounded-2xl p-8 items-center mt-2">
+            <Ionicons name="home-outline" size={28} color={colors.textSecondary} />
+            <Text className="text-textSecondary text-sm mt-2 text-center">
+              No rooms in this category yet.
+            </Text>
+          </View>
+        ) : (
+          filteredRooms.map((r) => {
+            const inRoom = devices.filter((d) => d.room === r.name);
+            const onCount = inRoom.filter((d) => d.isOn).length;
+            const totalCount = inRoom.length;
+            return (
+              <RoomListItem
+                key={r.id}
+                room={r}
+                onCount={onCount}
+                totalCount={totalCount}
+                onPress={() => router.push(`/rooms/${r.id}`)}
+              />
+            );
+          })
+        )}
       </ScrollView>
 
       <SafeAreaView edges={['bottom']} className="px-5 pb-3">
-        <Button label="Add new room" variant="outline" onPress={open} />
+        <Button label="Add new room" variant="outline" onPress={openAddRoom} />
       </SafeAreaView>
 
+      {/* Add Category modal */}
+      <BottomSheet
+        visible={showAddCategory}
+        onClose={() => setShowAddCategory(false)}
+      >
+        <Text className="text-text font-semibold text-lg mb-4 text-center">
+          New Category
+        </Text>
+        <Text className="text-textSecondary text-sm mb-2">Category Name</Text>
+        <View className="flex-row items-center bg-background border border-primary rounded-xl px-4 mb-6">
+          <TextInput
+            value={newCategoryName}
+            onChangeText={setNewCategoryName}
+            placeholder="Office"
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            className="flex-1 text-text py-3 text-base"
+          />
+          {newCategoryName ? (
+            <Pressable onPress={() => setNewCategoryName('')} hitSlop={6}>
+              <Ionicons name="close" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+        <Button
+          label="Add Category"
+          onPress={submitNewCategory}
+          disabled={newCategoryName.trim().length === 0}
+        />
+      </BottomSheet>
+
+      {/* Add Room multi-step flow */}
       <BottomSheet
         visible={step !== null && step !== 'success'}
-        onClose={close}
+        onClose={closeAddRoom}
       >
         {step === 'name' ? (
           <NameStep
             value={roomName}
             onChange={setRoomName}
-            onBack={close}
-            onCancel={close}
+            onBack={closeAddRoom}
+            onCancel={closeAddRoom}
+            onContinue={() => setStep('category')}
+          />
+        ) : null}
+        {step === 'category' ? (
+          <CategoryStep
+            categories={categories}
+            selected={roomCategory}
+            onSelect={setRoomCategory}
+            onBack={() => setStep('name')}
             onContinue={() => setStep('photos')}
           />
         ) : null}
@@ -144,7 +213,7 @@ export default function RoomsScreen() {
           <PhotosStep
             selected={photos}
             onToggle={togglePhoto}
-            onBack={() => setStep('name')}
+            onBack={() => setStep('category')}
             onContinue={() => setStep('devices')}
           />
         ) : null}
@@ -160,13 +229,62 @@ export default function RoomsScreen() {
 
       <SuccessModal
         visible={step === 'success'}
-        message={`${roomName.trim() || 'Master Bedroom'} Added!`}
+        message={`${roomName.trim() || 'Room'} Added!`}
         onClose={() => {
-          close();
-          router.replace('/(tabs)');
+          setSelectedCategoryId(roomCategory);
+          setStep(null);
         }}
       />
     </View>
+  );
+}
+
+function CategoryPills({
+  categories,
+  selectedId,
+  onSelect,
+  onAdd,
+}: {
+  categories: Category[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  onAdd: () => void;
+}) {
+  const { colors } = useTheme();
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+      className="mb-4 mt-1"
+    >
+      {categories.map((c) => {
+        const active = c.id === selectedId;
+        return (
+          <Pressable
+            key={c.id}
+            onPress={() => onSelect(c.id)}
+            className={`px-4 py-2 rounded-full ${active ? 'bg-primary' : 'bg-surface border border-border'}`}
+          >
+            <Text
+              className={`text-sm ${active ? 'text-white font-semibold' : 'text-textSecondary'}`}
+            >
+              {c.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+      <Pressable
+        onPress={onAdd}
+        className="flex-row items-center bg-surface border border-border rounded-full pl-2 pr-3 py-1.5"
+      >
+        <View className="w-6 h-6 rounded-full bg-primary items-center justify-center mr-1.5">
+          <Ionicons name="add" size={14} color="#fff" />
+        </View>
+        <Text className="text-text text-sm font-medium">Add</Text>
+      </Pressable>
+      <View style={{ width: 8 }} />
+    </ScrollView>
   );
 }
 
@@ -271,6 +389,68 @@ function NameStep({
         />
         <Button label="Cancel" variant="outline" onPress={onCancel} />
       </View>
+    </View>
+  );
+}
+
+function CategoryStep({
+  categories,
+  selected,
+  onSelect,
+  onBack,
+  onContinue,
+}: {
+  categories: Category[];
+  selected: string;
+  onSelect: (id: string) => void;
+  onBack: () => void;
+  onContinue: () => void;
+}) {
+  const { colors } = useTheme();
+  return (
+    <View>
+      <StepHeader title="Pick Category" onBack={onBack} />
+      <View className="gap-3 mb-5">
+        {categories.map((c) => {
+          const active = c.id === selected;
+          return (
+            <Pressable
+              key={c.id}
+              onPress={() => onSelect(c.id)}
+              className="bg-background border border-border rounded-2xl p-3 flex-row items-center"
+            >
+              <View
+                className="w-11 h-11 rounded-full items-center justify-center"
+                style={{ backgroundColor: c.tintColor }}
+              >
+                <Ionicons name="home" size={20} color="#1A1A1A" />
+              </View>
+              <Text className="flex-1 text-text font-semibold text-base ml-3">
+                {c.name}
+              </Text>
+              <View
+                className="w-6 h-6 rounded-full items-center justify-center"
+                style={{
+                  borderWidth: 2,
+                  borderColor: active ? colors.primary : colors.border,
+                }}
+              >
+                {active ? (
+                  <View
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: colors.primary }}
+                  />
+                ) : null}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Button
+        label="Continue"
+        onPress={onContinue}
+        disabled={selected.length === 0}
+      />
     </View>
   );
 }

@@ -8,7 +8,7 @@ export const DEVICES: Device[] = [
     status: 'Connected',
     isOn: true,
     kwhPerHour: 2,
-    room: 'Bed Room',
+    room: 'Master Bedroom',
     type: 'ac',
   },
   {
@@ -18,7 +18,7 @@ export const DEVICES: Device[] = [
     status: 'Disconnected',
     isOn: false,
     kwhPerHour: 2,
-    room: 'Bed Room',
+    room: 'Master Bedroom',
     type: 'light',
   },
   {
@@ -28,7 +28,7 @@ export const DEVICES: Device[] = [
     status: 'Disconnected',
     isOn: false,
     kwhPerHour: 2,
-    room: 'Bed Room',
+    room: 'Edamame Bedroom',
     type: 'fan',
   },
   {
@@ -38,7 +38,7 @@ export const DEVICES: Device[] = [
     status: 'Disconnected',
     isOn: false,
     kwhPerHour: 2,
-    room: 'Living Room',
+    room: 'Main Living Room',
     type: 'speaker',
   },
   {
@@ -48,7 +48,7 @@ export const DEVICES: Device[] = [
     status: 'Connected',
     isOn: true,
     kwhPerHour: 2,
-    room: 'Living Room',
+    room: 'Main Living Room',
     type: 'camera',
   },
   {
@@ -58,7 +58,7 @@ export const DEVICES: Device[] = [
     status: 'Connected',
     isOn: true,
     kwhPerHour: 2,
-    room: 'Living Room',
+    room: 'Master Bedroom',
     type: 'lock',
   },
 ];
