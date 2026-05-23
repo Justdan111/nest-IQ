@@ -12,7 +12,7 @@ type Props = {
 export function DeviceCard({ device, onToggle, onPress }: Props) {
   const { colors } = useTheme();
   const active = device.isOn;
-  const iconColor = active ? '#fff' : colors.text;
+  const iconColor = active ? colors.primary : colors.text;
 
   return (
     <Pressable
@@ -21,7 +21,7 @@ export function DeviceCard({ device, onToggle, onPress }: Props) {
     >
       <View className="flex-row items-start justify-between mb-6">
         <View
-          className={`w-11 h-11 rounded-full items-center justify-center ${active ? 'bg-white/20' : 'bg-surfaceAlt'}`}
+          className={`w-11 h-11 rounded-full items-center justify-center ${active ? 'bg-white' : 'bg-surfaceAlt'}`}
         >
           <Ionicons
             name={device.icon as keyof typeof Ionicons.glyphMap}
