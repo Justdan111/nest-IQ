@@ -17,6 +17,10 @@ type RoomsContextValue = {
   categories: Category[];
   /** Append a room. Returns the room with its resolved id. */
   addRoom: (room: NewRoom) => Room;
+  /** Patch fields on an existing room. No-op if id is unknown. */
+  updateRoom: (id: string, patch: Partial<Omit<Room, 'id'>>) => void;
+  /** Remove a room. Devices still referencing it must be cleaned up by the caller. */
+  deleteRoom: (id: string) => void;
   /** Append a category by name. Returns the category with its resolved id. */
   addCategory: (name: string) => Category;
   /** Append uploaded media (camera roll / camera) to a room's gallery. */
@@ -42,6 +46,19 @@ export function RoomsProvider({ children }: { children: ReactNode }) {
     return created;
   }, []);
 
+  const updateRoom = useCallback(
+    (id: string, patch: Partial<Omit<Room, 'id'>>) => {
+      setRooms((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+      );
+    },
+    [],
+  );
+
+  const deleteRoom = useCallback((id: string) => {
+    setRooms((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+
   const addCategory = useCallback((name: string) => {
     const id = `c-${Date.now()}`;
     setCategories((prev) => {
@@ -64,8 +81,24 @@ export function RoomsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<RoomsContextValue>(
-    () => ({ rooms, categories, addRoom, addCategory, addRoomMedia }),
-    [rooms, categories, addRoom, addCategory, addRoomMedia],
+    () => ({
+      rooms,
+      categories,
+      addRoom,
+      updateRoom,
+      deleteRoom,
+      addCategory,
+      addRoomMedia,
+    }),
+    [
+      rooms,
+      categories,
+      addRoom,
+      updateRoom,
+      deleteRoom,
+      addCategory,
+      addRoomMedia,
+    ],
   );
 
   return createElement(RoomsContext.Provider, { value }, children);

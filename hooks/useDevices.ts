@@ -15,6 +15,10 @@ type DevicesContextValue = {
   toggleDevice: (id: string) => void;
   devicesByRoom: Record<string, Device[]>;
   activeCount: number;
+  /** Repoint every device in `oldName` to `newName` (called when a room is renamed). */
+  renameRoomDevices: (oldName: string, newName: string) => void;
+  /** Drop every device tied to `roomName` (called when a room is deleted). */
+  removeRoomDevices: (roomName: string) => void;
 };
 
 const DevicesContext = createContext<DevicesContextValue | null>(null);
@@ -36,6 +40,17 @@ export function DevicesProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const renameRoomDevices = useCallback((oldName: string, newName: string) => {
+    if (oldName === newName) return;
+    setDevices((prev) =>
+      prev.map((d) => (d.room === oldName ? { ...d, room: newName } : d)),
+    );
+  }, []);
+
+  const removeRoomDevices = useCallback((roomName: string) => {
+    setDevices((prev) => prev.filter((d) => d.room !== roomName));
+  }, []);
+
   const devicesByRoom = useMemo(() => {
     const grouped: Record<string, Device[]> = {};
     for (const d of devices) {
@@ -51,8 +66,22 @@ export function DevicesProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<DevicesContextValue>(
-    () => ({ devices, toggleDevice, devicesByRoom, activeCount }),
-    [devices, toggleDevice, devicesByRoom, activeCount],
+    () => ({
+      devices,
+      toggleDevice,
+      devicesByRoom,
+      activeCount,
+      renameRoomDevices,
+      removeRoomDevices,
+    }),
+    [
+      devices,
+      toggleDevice,
+      devicesByRoom,
+      activeCount,
+      renameRoomDevices,
+      removeRoomDevices,
+    ],
   );
 
   return createElement(DevicesContext.Provider, { value }, children);

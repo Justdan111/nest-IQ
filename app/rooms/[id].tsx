@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDevices } from '@/hooks/useDevices';
 import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
@@ -34,9 +43,11 @@ const DEVICE_TYPES: {
 
 export default function RoomDetailsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { devices, toggleDevice } = useDevices();
-  const { rooms, addRoomMedia } = useRooms();
+  const { devices, toggleDevice, renameRoomDevices, removeRoomDevices } =
+    useDevices();
+  const { rooms, categories, addRoomMedia, updateRoom, deleteRoom } = useRooms();
   const params = useLocalSearchParams<{ id: string }>();
 
   const room = rooms.find((r) => r.id === params.id) ?? rooms[0];
@@ -49,6 +60,50 @@ export default function RoomDetailsScreen() {
 
   const [step, setStep] = useState<DeviceStep>(null);
   const [pickedTypes, setPickedTypes] = useState<string[]>([]);
+
+  // Header overflow menu + edit panel.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editCategoryId, setEditCategoryId] = useState('');
+
+  const openEdit = () => {
+    setEditName(room.name);
+    setEditCategoryId(room.categoryId);
+    setMenuOpen(false);
+    setEditOpen(true);
+  };
+
+  const saveEdit = () => {
+    const next = editName.trim();
+    if (!next) return;
+    if (next !== room.name) {
+      // Devices reference rooms by name, so keep them in sync.
+      renameRoomDevices(room.name, next);
+    }
+    updateRoom(room.id, { name: next, categoryId: editCategoryId });
+    setEditOpen(false);
+  };
+
+  const confirmDelete = () => {
+    setMenuOpen(false);
+    Alert.alert(
+      'Delete room?',
+      `"${room.name}" and its devices will be removed.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            removeRoomDevices(room.name);
+            deleteRoom(room.id);
+            router.back();
+          },
+        },
+      ],
+    );
+  };
 
   const openAdd = () => {
     setPickedTypes([]);
@@ -119,7 +174,7 @@ export default function RoomDetailsScreen() {
           <Text className="text-text font-semibold text-lg" numberOfLines={1}>
             {room.name}
           </Text>
-          <Pressable hitSlop={10}>
+          <Pressable hitSlop={10} onPress={() => setMenuOpen(true)}>
             <View className="w-9 h-9 rounded-full bg-surface items-center justify-center">
               <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
             </View>

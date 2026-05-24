@@ -27,7 +27,7 @@ export function SuccessModal({
   visible,
   title = 'Congratulation!',
   message,
-  ctaLabel = 'Home',
+  ctaLabel = 'Close',
   onClose,
 }: Props) {
   return (
