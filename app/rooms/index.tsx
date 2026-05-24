@@ -316,7 +316,7 @@ function RoomListItem({
           cropped to a vertical strip like `cover` does. */}
       <Image
         source={room.image}
-        resizeMode="contain"
+        resizeMode="cover"
         style={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
