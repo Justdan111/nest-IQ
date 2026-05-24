@@ -112,17 +112,20 @@ export default function RoomsScreen() {
         </View>
       </SafeAreaView>
 
-      <CategoryPills
-        categories={categories}
-        selectedId={selectedCategoryId}
-        onSelect={setSelectedCategoryId}
-        onAdd={() => {
-          setNewCategoryName('');
-          setShowAddCategory(true);
-        }}
-      />
+      <View className="mt-1 mb-4">
+        <CategoryPills
+          categories={categories}
+          selectedId={selectedCategoryId}
+          onSelect={setSelectedCategoryId}
+          onAdd={() => {
+            setNewCategoryName('');
+            setShowAddCategory(true);
+          }}
+        />
+      </View>
 
       <ScrollView
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 20 }}
       >
@@ -255,8 +258,11 @@ function CategoryPills({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-      className="mb-4 mt-1"
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        gap: 8,
+        alignItems: 'center',
+      }}
     >
       {categories.map((c) => {
         const active = c.id === selectedId;
