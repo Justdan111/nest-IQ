@@ -311,10 +311,13 @@ function RoomListItem({
       className="rounded-2xl overflow-hidden mb-4 bg-surface"
       style={{ height: 200 }}
     >
+      {/* `contain` keeps each room photo fully visible inside the fixed card —
+          portrait sources show with surface-colored bars instead of being
+          cropped to a vertical strip like `cover` does. */}
       <Image
         source={room.image}
-        resizeMode="cover"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        resizeMode="contain"
+        style={{ width: '100%', height: '100%' }}
       />
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.85)']}
