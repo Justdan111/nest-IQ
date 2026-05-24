@@ -375,6 +375,96 @@ export default function RoomDetailsScreen() {
         initialIndex={viewerIndex}
         onClose={() => setViewerOpen(false)}
       />
+
+      {/* Header overflow dropdown — floats under the ellipsis. */}
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
+          <View
+            className="absolute bg-surface rounded-2xl py-1.5 border border-border"
+            style={{
+              top: insets.top + 50,
+              right: 20,
+              minWidth: 160,
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOpacity: 0.25,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+            }}
+          >
+            <Pressable
+              onPress={openEdit}
+              className="flex-row items-center px-4 py-3"
+            >
+              <Ionicons name="create-outline" size={18} color={colors.text} />
+              <Text className="text-text text-base ml-3">Edit</Text>
+            </Pressable>
+            <View className="h-px bg-border mx-3" />
+            <Pressable
+              onPress={confirmDelete}
+              className="flex-row items-center px-4 py-3"
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text className="text-error text-base ml-3">Delete</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Edit Room sheet — name + category. */}
+      <BottomSheet visible={editOpen} onClose={() => setEditOpen(false)}>
+        <Text className="text-text font-semibold text-lg mb-4 text-center">
+          Edit Room
+        </Text>
+
+        <Text className="text-textSecondary text-sm mb-2">Room Name</Text>
+        <View className="flex-row items-center bg-background border border-primary rounded-xl px-4 mb-5">
+          <TextInput
+            value={editName}
+            onChangeText={setEditName}
+            placeholder="Master Bedroom"
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            className="flex-1 text-text py-3 text-base"
+          />
+          {editName ? (
+            <Pressable onPress={() => setEditName('')} hitSlop={6}>
+              <Ionicons name="close" size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+
+        <Text className="text-textSecondary text-sm mb-2">Category</Text>
+        <View className="flex-row flex-wrap mb-6" style={{ gap: 8 }}>
+          {categories.map((c) => {
+            const active = c.id === editCategoryId;
+            return (
+              <Pressable
+                key={c.id}
+                onPress={() => setEditCategoryId(c.id)}
+                className={`px-4 py-2 rounded-full ${active ? 'bg-primary' : 'bg-background border border-border'}`}
+              >
+                <Text
+                  className={`text-sm ${active ? 'text-white font-semibold' : 'text-textSecondary'}`}
+                >
+                  {c.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Button
+          label="Save"
+          onPress={saveEdit}
+          disabled={editName.trim().length === 0}
+        />
+      </BottomSheet>
     </View>
   );
 }
