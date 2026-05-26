@@ -5,10 +5,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+  Text, TextInput, View, } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
