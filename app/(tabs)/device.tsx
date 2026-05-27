@@ -35,7 +35,7 @@ export default function DeviceScreen() {
         </View>
 
         <View className="items-center mt-6 mb-4">
-          <CircularTempSlider size={280} initial={24} />
+          <CircularTempSlider size={350} initial={24} />
         </View>
 
         <View className="px-5 mt-2">
