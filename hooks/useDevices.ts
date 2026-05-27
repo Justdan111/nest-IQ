@@ -10,11 +10,15 @@ import {
 import { DEVICES } from '@/constants/Devices';
 import type { Device } from '@/types';
 
+type NewDevice = Omit<Device, 'id'> & { id?: string };
+
 type DevicesContextValue = {
   devices: Device[];
   toggleDevice: (id: string) => void;
   devicesByRoom: Record<string, Device[]>;
   activeCount: number;
+  /** Append a device. Returns the device with its resolved id. */
+  addDevice: (device: NewDevice) => Device;
   /** Repoint every device in `oldName` to `newName` (called when a room is renamed). */
   renameRoomDevices: (oldName: string, newName: string) => void;
   /** Drop every device tied to `roomName` (called when a room is deleted). */
@@ -25,6 +29,12 @@ const DevicesContext = createContext<DevicesContextValue | null>(null);
 
 export function DevicesProvider({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<Device[]>(DEVICES);
+
+  const addDevice = useCallback((device: NewDevice) => {
+    const created: Device = { ...device, id: device.id ?? `d-${Date.now()}` };
+    setDevices((prev) => [...prev, created]);
+    return created;
+  }, []);
 
   const toggleDevice = useCallback((id: string) => {
     setDevices((prev) =>
@@ -71,6 +81,7 @@ export function DevicesProvider({ children }: { children: ReactNode }) {
       toggleDevice,
       devicesByRoom,
       activeCount,
+      addDevice,
       renameRoomDevices,
       removeRoomDevices,
     }),
@@ -79,6 +90,7 @@ export function DevicesProvider({ children }: { children: ReactNode }) {
       toggleDevice,
       devicesByRoom,
       activeCount,
+      addDevice,
       renameRoomDevices,
       removeRoomDevices,
     ],
