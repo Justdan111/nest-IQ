@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -6,20 +5,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDevices } from '@/hooks/useDevices';
 import { CircularTempSlider } from '@/components/device/CircularTempSlider';
 import { DeviceCard } from '@/components/ui/DeviceCard';
-import { MoodSelector } from '@/components/device/MoodSelector';
-import { Button } from '@/components/ui/Button';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useSidebar } from '@/components/ui/Sidebar';
 import { useTheme } from '@/hooks/useTheme';
-
-type Mood = 'cool' | 'heat' | 'wind' | 'auto';
+import { controlRouteForDevice } from '@/components/device/controlRoute';
 
 export default function DeviceScreen() {
   const router = useRouter();
   const { open } = useSidebar();
   const { colors } = useTheme();
   const { devices, toggleDevice } = useDevices();
-  const [mood, setMood] = useState<Mood>('cool');
 
   const acDevices = devices.filter((d) => d.type === 'ac' || d.type === 'light').slice(0, 2);
 
@@ -50,16 +45,22 @@ export default function DeviceScreen() {
             onAction={() => router.push('/devices')}
           />
           <View className="flex-row gap-3 mb-6">
-            {acDevices.map((d) => (
-              <DeviceCard key={d.id} device={d} onToggle={toggleDevice} />
-            ))}
-          </View>
-
-          <Text className="text-text font-semibold text-lg mb-3">Select Mood</Text>
-          <MoodSelector selected={mood} onSelect={setMood} />
-
-          <View className="mt-8">
-            <Button label="Set Timer" variant="outline" icon="time-outline" />
+            {acDevices.map((d) => {
+              const route = controlRouteForDevice(d);
+              return (
+                <DeviceCard
+                  key={d.id}
+                  device={d}
+                  onToggle={toggleDevice}
+                  onPress={
+                    route
+                      ? () =>
+                          router.push({ pathname: route, params: { id: d.id } })
+                      : undefined
+                  }
+                />
+              );
+            })}
           </View>
         </View>
       </ScrollView>

@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { DeviceCard } from '@/components/ui/DeviceCard';
 import { DeviceToggleRow } from '@/components/ui/DeviceToggleRow';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { controlRouteForDevice } from '@/components/device/controlRoute';
 
 /**
  * Full inventory of every device in the home. Reached from the Device tab via
