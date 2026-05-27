@@ -61,11 +61,26 @@ export default function DeviceListScreen() {
             </View>
           ) : (
             <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-              {devices.map((d) => (
-                <View key={d.id} style={{ width: '47%' }}>
-                  <DeviceCard device={d} onToggle={toggleDevice} />
-                </View>
-              ))}
+              {devices.map((d) => {
+                const route = controlRouteForDevice(d);
+                return (
+                  <View key={d.id} style={{ width: '47%' }}>
+                    <DeviceCard
+                      device={d}
+                      onToggle={toggleDevice}
+                      onPress={
+                        route
+                          ? () =>
+                              router.push({
+                                pathname: route,
+                                params: { id: d.id },
+                              })
+                          : undefined
+                      }
+                    />
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>
