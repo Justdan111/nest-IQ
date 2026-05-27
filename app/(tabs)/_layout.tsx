@@ -1,95 +1,121 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SidebarProvider } from '@/components/ui/Sidebar';
 import { useTheme } from '@/hooks/useTheme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-function TabIcon({
-  name,
-  focused,
-  inactiveColor,
-}: {
-  name: IconName;
-  focused: boolean;
-  inactiveColor: string;
-}) {
+// Per-route icon mapping. Keep in sync with the screen names below.
+const ROUTE_ICONS: Record<string, IconName> = {
+  index: 'home-outline',
+  device: 'radio-outline',
+  statistic: 'bar-chart-outline',
+  automations: 'timer-outline',
+  camera: 'videocam-outline',
+};
+
+/**
+ * Custom bottom tab bar: Home sits in its own rounded pill, the remaining
+ * four routes share one connected pill to the right. Active tabs just tint
+ * the icon primary — no background highlight — per the design.
+ */
+function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const navigateTo = (
+    routeName: string,
+    routeKey: string,
+    isFocused: boolean,
+  ) => {
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: routeKey,
+      canPreventDefault: true,
+    });
+    if (!isFocused && !event.defaultPrevented) {
+      navigation.navigate(routeName as never);
+    }
+  };
+
+  const homeRoute = state.routes[0];
+  const homeFocused = state.index === 0;
+  const otherRoutes = state.routes.slice(1);
+
   return (
     <View
-      className={`w-12 h-12 rounded-full items-center justify-center ${focused ? 'bg-primary' : ''}`}
+      pointerEvents="box-none"
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 10,
+        flexDirection: 'row',
+        gap: 12,
+      }}
     >
-      <Ionicons name={name} size={22} color={focused ? '#fff' : inactiveColor} />
+      <Pressable
+        onPress={() => navigateTo(homeRoute.name, homeRoute.key, homeFocused)}
+        accessibilityRole="button"
+        accessibilityState={homeFocused ? { selected: true } : {}}
+        className="bg-surface rounded-2xl items-center justify-center"
+        style={{ width: 80, height: 64 }}
+      >
+        <Ionicons
+          name={ROUTE_ICONS[homeRoute.name] ?? 'home-outline'}
+          size={26}
+          color={homeFocused ? colors.primary : colors.textSecondary}
+        />
+      </Pressable>
+
+      <View
+        className="bg-surface rounded-2xl flex-row flex-1"
+        style={{ height: 64 }}
+      >
+        {otherRoutes.map((route, i) => {
+          const index = i + 1;
+          const focused = state.index === index;
+          return (
+            <Pressable
+              key={route.key}
+              onPress={() => navigateTo(route.name, route.key, focused)}
+              accessibilityRole="button"
+              accessibilityState={focused ? { selected: true } : {}}
+              className="flex-1 items-center justify-center"
+            >
+              <Ionicons
+                name={ROUTE_ICONS[route.name] ?? 'ellipse-outline'}
+                size={26}
+                color={focused ? colors.primary : colors.textSecondary}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 export default function TabsLayout() {
-  const { colors } = useTheme();
   return (
     <SidebarProvider>
       <Tabs
+        tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarStyle: {
-            backgroundColor: colors.surface,
-            borderTopWidth: 0,
-            height: 78,
-            paddingTop: 10,
-            paddingBottom: 18,
-            position: 'absolute',
-          },
         }}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="home" focused={focused} inactiveColor={colors.textSecondary} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="device"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                name="hardware-chip-outline"
-                focused={focused}
-                inactiveColor={colors.textSecondary}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="statistic"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="stats-chart" focused={focused} inactiveColor={colors.textSecondary} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="automations"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                name="layers-outline"
-                focused={focused}
-                inactiveColor={colors.textSecondary}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="camera"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <TabIcon name="videocam" focused={focused} inactiveColor={colors.textSecondary} />
-            ),
-          }}
-        />
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="device" />
+        <Tabs.Screen name="statistic" />
+        <Tabs.Screen name="automations" />
+        <Tabs.Screen name="camera" />
       </Tabs>
     </SidebarProvider>
   );
