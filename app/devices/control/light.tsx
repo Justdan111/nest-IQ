@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -173,37 +173,38 @@ export default function LightControlScreen() {
             </Pressable>
           </View>
 
-          {/* Lamp card with color-picker affordance + hero icon. */}
+          {/* Lamp card — full-bleed lamp photo with the color affordance
+              floated in the top-left. The photo already lives on a dark
+              background so we always use a dark base regardless of theme. */}
           <View
-            className="rounded-3xl bg-surface p-4 mb-6"
-            style={{ height: 280 }}
+            className="rounded-3xl overflow-hidden mb-6"
+            style={{ height: 280, backgroundColor: '#1A1A1A' }}
           >
-            <Text className="text-text font-semibold text-base">Color</Text>
-            <Pressable
-              onPress={() => {
-                setDraftColor(color);
-                setColorOpen(true);
-              }}
-              className="w-10 h-10 rounded-full mt-1.5"
+            <Image
+              source={require('@/assets/images/lamplight.jpg')}
+              resizeMode="cover"
               style={{
-                backgroundColor: color,
-                borderWidth: 2,
-                borderColor: colors.surface,
+                width: '100%',
+                height: '100%',
+                opacity: isOn ? 1 : 0.35,
               }}
             />
-            <View className="absolute inset-0 items-center justify-center">
-              <View
-                className="w-36 h-36 rounded-full items-center justify-center"
-                style={{
-                  backgroundColor: isOn ? `${color}33` : 'transparent',
+            <View
+              style={{ position: 'absolute', top: 0, left: 0, padding: 16 }}
+            >
+              <Text className="text-white font-semibold text-base">Color</Text>
+              <Pressable
+                onPress={() => {
+                  setDraftColor(color);
+                  setColorOpen(true);
                 }}
-              >
-                <Ionicons
-                  name={isOn ? 'bulb' : 'bulb-outline'}
-                  size={120}
-                  color={isOn ? color : colors.textSecondary}
-                />
-              </View>
+                className="w-10 h-10 rounded-full mt-1.5"
+                style={{
+                  backgroundColor: color,
+                  borderWidth: 2,
+                  borderColor: '#1A1A1A',
+                }}
+              />
             </View>
           </View>
 
