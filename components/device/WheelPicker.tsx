@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -16,15 +16,23 @@ type Props = {
 /**
  * Vertical wheel-style picker used by the AC timer and the light schedule
  * on/off time fields. The middle slot is the active value — items above and
- * below dim away. Snap is driven by `snapToInterval` so the picker always
- * lands on an exact row.
+ * below dim away. Snap is driven by `snapToInterval`.
+ *
+ * Value commits on BOTH momentum-end and drag-end so a slow precise drag
+ * (which produces no momentum) still registers, and each row is also tappable
+ * for a non-scroll way to pick.
  */
 export function WheelPicker({ values, selectedIndex, onChange, width = 76 }: Props) {
   const { colors } = useTheme();
   const ref = useRef<FlatList<string>>(null);
   const [activeIndex, setActiveIndex] = useState(selectedIndex);
+  // Tracks the last value we know about so the sync effect below doesn't
+  // re-scroll (and fight) the user's own in-progress gesture.
+  const lastKnown = useRef(selectedIndex);
 
   useEffect(() => {
+    if (selectedIndex === lastKnown.current) return;
+    lastKnown.current = selectedIndex;
     setActiveIndex(selectedIndex);
     ref.current?.scrollToOffset({
       offset: selectedIndex * ITEM_HEIGHT,
@@ -32,16 +40,36 @@ export function WheelPicker({ values, selectedIndex, onChange, width = 76 }: Pro
     });
   }, [selectedIndex]);
 
-  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const i = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
-    const clamped = Math.max(0, Math.min(values.length - 1, i));
-    if (clamped !== activeIndex) setActiveIndex(clamped);
+  const clamp = (i: number) => Math.max(0, Math.min(values.length - 1, i));
+
+  const commit = (offsetY: number) => {
+    const i = clamp(Math.round(offsetY / ITEM_HEIGHT));
+    setActiveIndex(i);
+    if (i !== lastKnown.current) {
+      lastKnown.current = i;
+      onChange(i);
+    }
   };
 
-  const handleMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const i = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
-    const clamped = Math.max(0, Math.min(values.length - 1, i));
-    if (clamped !== selectedIndex) onChange(clamped);
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const i = clamp(Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT));
+    if (i !== activeIndex) setActiveIndex(i);
+  };
+
+  const handleDragEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    // Only commit here when the finger lifted without a fling; otherwise let
+    // momentum settle and commit in onMomentumScrollEnd (avoids a double fire).
+    const velocity = e.nativeEvent.velocity?.y ?? 0;
+    if (Math.abs(velocity) < 0.1) commit(e.nativeEvent.contentOffset.y);
+  };
+
+  const selectIndex = (i: number) => {
+    ref.current?.scrollToOffset({ offset: i * ITEM_HEIGHT, animated: true });
+    setActiveIndex(i);
+    if (i !== lastKnown.current) {
+      lastKnown.current = i;
+      onChange(i);
+    }
   };
 
   return (
@@ -52,7 +80,9 @@ export function WheelPicker({ values, selectedIndex, onChange, width = 76 }: Pro
         keyExtractor={(_, i) => String(i)}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
+        disableIntervalMomentum
         decelerationRate="fast"
+        nestedScrollEnabled
         initialScrollIndex={selectedIndex}
         getItemLayout={(_, i) => ({
           length: ITEM_HEIGHT,
@@ -61,13 +91,15 @@ export function WheelPicker({ values, selectedIndex, onChange, width = 76 }: Pro
         })}
         contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
         onScroll={handleScroll}
-        scrollEventThrottle={32}
-        onMomentumScrollEnd={handleMomentumEnd}
+        scrollEventThrottle={16}
+        onScrollEndDrag={handleDragEnd}
+        onMomentumScrollEnd={(e) => commit(e.nativeEvent.contentOffset.y)}
         renderItem={({ item, index }) => {
           const distance = Math.abs(index - activeIndex);
           const isActive = distance === 0;
           return (
-            <View
+            <Pressable
+              onPress={() => selectIndex(index)}
               style={{
                 height: ITEM_HEIGHT,
                 alignItems: 'center',
@@ -84,7 +116,7 @@ export function WheelPicker({ values, selectedIndex, onChange, width = 76 }: Pro
               >
                 {item}
               </Text>
-            </View>
+            </Pressable>
           );
         }}
       />
