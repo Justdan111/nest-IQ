@@ -10,10 +10,10 @@ import type { User } from '@/types';
 
 const DEFAULT_USER: User = {
   id: 'u1',
-  name: 'Alex',
-  email: 'alex@nestiq.app',
-  homeName: 'My Home',
-  address: '742 Evergreen Terrace',
+  name: 'Tomas Watson',
+  email: 'tomas257@gmail.com',
+  homeName: 'Fillo House',
+  address: 'Sylhet, Bangladesh',
 };
 
 type AppStateContextValue = {

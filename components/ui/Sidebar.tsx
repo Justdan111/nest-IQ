@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { Dimensions, Pressable, Text, View } from 'react-native';
+import { Alert, Dimensions, Pressable, Text, View } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -13,9 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
+import { initials } from '@/utils/initials';
 
 const { width } = Dimensions.get('window');
-const PANEL_WIDTH = Math.min(width * 0.78, 320);
+const PANEL_WIDTH = Math.min(width * 0.82, 340);
 
 type SidebarContextValue = {
   open: () => void;
@@ -37,17 +38,18 @@ type MenuItem = {
 };
 
 const MENU_ITEMS: MenuItem[] = [
-  { label: 'Home', icon: 'home', route: '/(tabs)' },
-  { label: 'Devices', icon: 'hardware-chip-outline', route: '/(tabs)/device' },
-  { label: 'Statistics', icon: 'stats-chart', route: '/(tabs)/statistic' },
-  { label: 'Automations', icon: 'layers-outline', route: '/(tabs)/automations' },
-  { label: 'Camera', icon: 'videocam', route: '/(tabs)/camera' },
+  { label: 'Door Security', icon: 'shield-checkmark', route: '/security' },
+  { label: 'Cars', icon: 'car-sport' },
+  { label: 'Setting', icon: 'settings-sharp', route: '/settings' },
+  { label: 'Users', icon: 'people' },
+  { label: 'Push Notification', icon: 'notifications', route: '/settings' },
+  { label: 'Support', icon: 'help-buoy' },
 ];
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user } = useAppState();
-  const { colors, isDark, toggleColorScheme } = useTheme();
+  const { colors } = useTheme();
   const [rendered, setRendered] = useState(false);
   const progress = useSharedValue(0);
 
@@ -81,6 +83,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const go = (route?: string) => {
     close();
     if (route) router.push(route as never);
+    else Alert.alert('Coming soon', 'This section is not available yet.');
   };
 
   return (
@@ -106,77 +109,71 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
                 left: 0,
                 bottom: 0,
                 width: PANEL_WIDTH,
-                backgroundColor: colors.surface,
+                backgroundColor: colors.background,
               },
               panelStyle,
             ]}
           >
-            <SafeAreaView edges={['top', 'bottom']} className="flex-1 px-5">
-              <View className="flex-row items-center justify-between pt-2 mb-8">
-                <Text className="text-text font-semibold text-lg">Menu</Text>
-                <Pressable onPress={close} hitSlop={10}>
-                  <Ionicons name="close" size={24} color={colors.text} />
+            <SafeAreaView edges={['top', 'bottom']} className="flex-1 px-6">
+              <Pressable
+                onPress={close}
+                hitSlop={10}
+                className="w-9 h-9 rounded-full bg-surface items-center justify-center mt-2"
+              >
+                <Ionicons name="close" size={20} color={colors.text} />
+              </Pressable>
+
+              {/* Profile block */}
+              <View className="mt-6 mb-8">
+                <View className="flex-row items-center">
+                  <View className="w-16 h-16 rounded-full bg-primary items-center justify-center">
+                    <Text className="text-white font-bold text-xl">
+                      {initials(user.name)}
+                    </Text>
+                  </View>
+                  <View className="ml-3 flex-1">
+                    <Text className="text-text font-bold text-lg" numberOfLines={1}>
+                      {user.name}
+                    </Text>
+                    <Text className="text-textSecondary text-sm" numberOfLines={1}>
+                      {user.email}
+                    </Text>
+                  </View>
+                </View>
+                <Pressable
+                  onPress={() => go('/profile')}
+                  className="self-start bg-surface rounded-lg px-4 py-1.5 mt-3"
+                >
+                  <Text className="text-text text-sm font-medium">Edit</Text>
                 </Pressable>
               </View>
 
-              <View className="flex-row items-center mb-8">
-                <View className="w-14 h-14 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-white font-semibold text-xl">
-                    {user.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <View className="ml-3 flex-1">
-                  <Text className="text-text font-semibold text-base">{user.name}</Text>
-                  <Text className="text-textSecondary text-sm" numberOfLines={1}>
-                    {user.email}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="gap-1">
-                {MENU_ITEMS.map((item) => (
+              {/* Menu */}
+              <View>
+                {MENU_ITEMS.map((item, i) => (
                   <Pressable
                     key={item.label}
                     onPress={() => go(item.route)}
-                    className="flex-row items-center py-3.5"
+                    className={`flex-row items-center py-4 ${i < MENU_ITEMS.length - 1 ? 'border-b border-border' : ''}`}
                   >
-                    <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
-                    <Text className="text-text text-base ml-4">{item.label}</Text>
+                    <View className="w-9 h-9 rounded-full bg-primary items-center justify-center">
+                      <Ionicons name={item.icon} size={18} color="#fff" />
+                    </View>
+                    <Text className="text-text text-base font-medium ml-4">
+                      {item.label}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
 
-              <View className="h-px bg-border my-4" />
-
-              <Pressable
-                onPress={toggleColorScheme}
-                className="flex-row items-center py-3.5"
-              >
-                <Ionicons
-                  name={isDark ? 'moon' : 'sunny'}
-                  size={22}
-                  color={colors.textSecondary}
-                />
-                <Text className="text-text text-base ml-4 flex-1">
-                  {isDark ? 'Dark Mode' : 'Light Mode'}
-                </Text>
-                <View
-                  className={`w-12 h-7 rounded-full px-0.5 justify-center ${isDark ? 'bg-primary' : 'bg-surfaceAlt'}`}
-                >
-                  <View
-                    className={`w-6 h-6 rounded-full bg-white ${isDark ? 'self-end' : 'self-start'}`}
-                  />
-                </View>
-              </Pressable>
-
-              <View className="h-px bg-border my-4" />
+              <View className="flex-1" />
 
               <Pressable
                 onPress={() => go('/(auth)/welcome')}
-                className="flex-row items-center py-3.5"
+                className="flex-row items-center py-4"
               >
-                <Ionicons name="log-out-outline" size={22} color={colors.error} />
-                <Text className="text-error text-base ml-4">Log Out</Text>
+                <Ionicons name="log-out-outline" size={24} color={colors.text} />
+                <Text className="text-text text-base font-medium ml-3">Logout</Text>
               </Pressable>
             </SafeAreaView>
           </Animated.View>
