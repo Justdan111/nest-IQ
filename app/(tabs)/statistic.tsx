@@ -42,10 +42,18 @@ const PERIOD_DATA: Record<Period, { value: number; label: string; active?: boole
     { value: 65, label: 'Thu' },
   ],
   monthly: [
-    { value: 70, label: 'W1' },
-    { value: 90, label: 'W2' },
-    { value: 99, label: 'W3', active: true },
-    { value: 75, label: 'W4' },
+    { value: 55, label: 'Jan' },
+    { value: 70, label: 'Feb' },
+    { value: 82, label: 'Mar' },
+    { value: 64, label: 'Apr' },
+    { value: 99, label: 'May', active: true },
+    { value: 78, label: 'Jun' },
+    { value: 90, label: 'Jul' },
+    { value: 72, label: 'Aug' },
+    { value: 60, label: 'Sep' },
+    { value: 85, label: 'Oct' },
+    { value: 95, label: 'Nov' },
+    { value: 50, label: 'Dec' },
   ],
 };
 
