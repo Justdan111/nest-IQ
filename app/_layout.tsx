@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { AppStateProvider } from '@/hooks/useAppState';
 import { DevicesProvider } from '@/hooks/useDevices';
 import { RoomsProvider } from '@/hooks/useRooms';
+import { ScenesProvider } from '@/hooks/useScenes';
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -36,14 +37,16 @@ export default function RootLayout() {
         <AppStateProvider>
           <RoomsProvider>
             <DevicesProvider>
-              <StatusBar style="auto" />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.background },
-                  animation: 'fade',
-                }}
-              />
+              <ScenesProvider>
+                <StatusBar style="auto" />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.background },
+                    animation: 'fade',
+                  }}
+                />
+              </ScenesProvider>
             </DevicesProvider>
           </RoomsProvider>
         </AppStateProvider>

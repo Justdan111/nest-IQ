@@ -44,7 +44,7 @@ export function DeviceToggleRow({ device, onToggle, onPress }: Props) {
   );
 }
 
-function LabeledToggle({ value, onPress }: { value: boolean; onPress: () => void }) {
+export function LabeledToggle({ value, onPress }: { value: boolean; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
