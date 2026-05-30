@@ -1,20 +1,75 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  Text,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { CameraFeed } from '@/components/camera/CameraFeed';
 import { useSidebar } from '@/components/ui/Sidebar';
 import { useTheme } from '@/hooks/useTheme';
 
-const CAMERAS = [
-  { id: '1', room: 'Bed Room', floor: '2nd Floor', date: 'Today', time: '10:30 AM', active: true },
-  { id: '2', room: 'Living Room', floor: '1st Floor', date: 'Today', time: '10:24 AM' },
-  { id: '3', room: 'Front Door', floor: 'Entrance', date: 'Today', time: '09:58 AM' },
-  { id: '4', room: 'Garage', floor: 'Ground', date: 'Yesterday', time: '08:14 PM' },
+type Cam = {
+  id: string;
+  name: string;
+  floor: string;
+  date: string;
+  time: string;
+  image: ReturnType<typeof require>;
+  /** Optional live stream URL — when set, CameraFeed will switch into LIVE mode. */
+  streamUrl?: string;
+};
+
+const CAMERAS: Cam[] = [
+  {
+    id: '1',
+    name: 'Dining room',
+    floor: '1st Floor',
+    date: '11 Feb 2023',
+    time: '05:32:19',
+    image: require('@/assets/images/dinning.jpg'),
+  },
+  {
+    id: '2',
+    name: 'Bed Room',
+    floor: '1st Floor',
+    date: '11 Feb 2023',
+    time: '05:32:19',
+    image: require('@/assets/images/bedroom-01.jpg'),
+  },
+  {
+    id: '3',
+    name: 'Living room',
+    floor: '1st Floor',
+    date: '11 Feb 2023',
+    time: '05:32:19',
+    image: require('@/assets/images/livingroom.jpg'),
+  },
+  {
+    id: '4',
+    name: 'Kitchen',
+    floor: '1st Floor',
+    date: '11 Feb 2023',
+    time: '05:32:19',
+    image: require('@/assets/images/kitchen.jpg'),
+  },
 ];
 
 export default function CameraScreen() {
   const { open } = useSidebar();
   const { colors } = useTheme();
+
+  const [activeId, setActiveId] = useState<string>(CAMERAS[1].id); // Bed Room by default to match mockup
+  const [fullscreen, setFullscreen] = useState(false);
+
+  const active = CAMERAS.find((c) => c.id === activeId) ?? CAMERAS[0];
+
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView
@@ -27,66 +82,141 @@ export default function CameraScreen() {
           </Pressable>
           <Text className="text-text font-semibold text-lg">Real Time</Text>
           <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
+            <View className="w-9 h-9 rounded-full bg-surface items-center justify-center">
+              <Ionicons name="notifications-outline" size={20} color={colors.text} />
+            </View>
           </Pressable>
         </View>
 
-        <View className="mx-5 rounded-2xl overflow-hidden mb-6">
+        {/* Hero feed — tap to expand */}
+        <Pressable onPress={() => setFullscreen(true)} className="mx-5 mb-6">
+          <CameraFeed
+            poster={active.image}
+            streamUrl={active.streamUrl}
+            label={active.name}
+            height={260}
+            borderRadius={20}
+          />
           <View
-            style={{ height: 220, backgroundColor: colors.surface }}
-            className="items-center justify-center"
+            className="absolute bottom-3 right-3 w-9 h-9 rounded-full items-center justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
           >
-            <Ionicons name="videocam" size={48} color="#3B6FF0" />
-            <Text className="text-textSecondary text-sm mt-2">Live Feed</Text>
-
-            <View className="absolute top-3 left-3 bg-black/60 rounded-md px-2 py-1">
-              <Text className="text-white text-xs">REC ● LIVE</Text>
-            </View>
-            <View className="absolute top-3 right-3 bg-black/60 rounded-md px-2 py-1">
-              <Text className="text-white text-xs">10:32 AM</Text>
-            </View>
+            <Ionicons name="expand" size={16} color="#fff" />
           </View>
-        </View>
+        </Pressable>
 
         <View className="px-5">
-          <SectionHeader title="Cameras" actionLabel="Add New" actionVariant="pill" />
+          <SectionHeader
+            title="Cameras"
+            actionLabel="Add New"
+            actionVariant="pill"
+          />
           <View className="gap-3">
-            {CAMERAS.map((c) => (
-              <Pressable
-                key={c.id}
-                className={`rounded-2xl p-4 flex-row items-center ${c.active ? 'bg-primary' : 'bg-surface'}`}
-              >
-                <View
-                  className={`w-14 h-14 rounded-xl items-center justify-center ${c.active ? 'bg-white/20' : 'bg-surfaceAlt'}`}
+            {CAMERAS.map((c) => {
+              const isActive = c.id === activeId;
+              return (
+                <Pressable
+                  key={c.id}
+                  onPress={() => setActiveId(c.id)}
+                  className={`rounded-2xl p-3 flex-row items-center ${isActive ? 'bg-primary' : 'bg-surface'}`}
                 >
-                  <Ionicons
-                    name="videocam-outline"
-                    size={22}
-                    color={c.active ? '#fff' : colors.text}
+                  <Image
+                    source={c.image}
+                    resizeMode="cover"
+                    style={{ width: 56, height: 56, borderRadius: 12 }}
                   />
-                </View>
-                <View className="flex-1 ml-3">
-                  <Text
-                    className={`font-semibold text-base ${c.active ? 'text-white' : 'text-text'}`}
-                  >
-                    {c.room}
-                  </Text>
-                  <Text
-                    className={`text-xs mt-0.5 ${c.active ? 'text-white/80' : 'text-textSecondary'}`}
-                  >
-                    {c.floor} • {c.date} • {c.time}
-                  </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={c.active ? '#fff' : colors.textSecondary}
-                />
-              </Pressable>
-            ))}
+                  <View className="flex-1 ml-3">
+                    <Text
+                      className={`font-bold text-base ${isActive ? 'text-white' : 'text-text'}`}
+                    >
+                      {c.name}
+                    </Text>
+                    <Text
+                      className={`text-xs mt-0.5 ${isActive ? 'text-white/80' : 'text-textSecondary'}`}
+                    >
+                      {c.floor}
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text
+                      className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-text'}`}
+                    >
+                      {c.date}
+                    </Text>
+                    <Text
+                      className={`text-xs mt-0.5 ${isActive ? 'text-white/80' : 'text-textSecondary'}`}
+                    >
+                      {c.time}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
       </ScrollView>
+
+      <FullscreenFeedModal
+        visible={fullscreen}
+        camera={active}
+        onClose={() => setFullscreen(false)}
+      />
     </SafeAreaView>
+  );
+}
+
+function FullscreenFeedModal({
+  visible,
+  camera,
+  onClose,
+}: {
+  visible: boolean;
+  camera: Cam;
+  onClose: () => void;
+}) {
+  return (
+    <Modal
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+      supportedOrientations={['portrait', 'landscape']}
+      statusBarTranslucent
+    >
+      <StatusBar hidden />
+      <View style={{ flex: 1, backgroundColor: '#000' }}>
+        <CameraFeed
+          poster={camera.image}
+          streamUrl={camera.streamUrl}
+          label={camera.name}
+        />
+        <SafeAreaView
+          edges={['top']}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              padding: 16,
+            }}
+          >
+            <Pressable
+              onPress={onClose}
+              hitSlop={10}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </View>
+    </Modal>
   );
 }
