@@ -52,7 +52,7 @@ export default function AutomationsScreen() {
   const router = useRouter();
   const { open } = useSidebar();
   const { colors } = useTheme();
-  const { scenes, suggested, addScene } = useScenes();
+  const { scenes, suggested, addScene, updateScene, deleteScene } = useScenes();
   const { devices } = useDevices();
 
   // Multi-step flow state.
@@ -60,6 +60,14 @@ export default function AutomationsScreen() {
   const [sceneName, setSceneName] = useState('');
   const [schedule, setSchedule] = useState<'yes' | 'no' | null>(null);
   const [pickedIds, setPickedIds] = useState<string[]>([]);
+  // When set, the multi-step flow saves into this scene instead of creating one.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  // Action sheet for an existing scene (Edit / Delete).
+  const [action, setAction] = useState<SceneAction>(null);
+  const actionScene = useMemo(
+    () => scenes.find((s) => s.id === action?.sceneId) ?? null,
+    [scenes, action],
+  );
 
   const pickedDevices = useMemo(
     () => devices.filter((d) => pickedIds.includes(d.id)),
