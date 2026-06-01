@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
   ScrollView,
@@ -30,6 +31,8 @@ type Step =
   | 'add-device' // select devices to include
   | 'confirm-device' // review chosen devices
   | 'success';
+
+type SceneAction = { sceneId: string } | null;
 
 // Tint each device's confirmation-card icon by type so the review grid feels
 // "characterized" like the mockup (lock = amber, camera = blue, …).

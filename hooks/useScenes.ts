@@ -17,6 +17,10 @@ type ScenesContextValue = {
   suggested: typeof SUGGESTED_SCENES;
   /** Append a scene. Returns the scene with its resolved id. */
   addScene: (scene: NewScene) => Scene;
+  /** Patch fields on an existing scene. No-op if id is unknown. */
+  updateScene: (id: string, patch: Partial<Omit<Scene, 'id'>>) => void;
+  /** Remove a scene by id. */
+  deleteScene: (id: string) => void;
 };
 
 const ScenesContext = createContext<ScenesContextValue | null>(null);
@@ -30,9 +34,28 @@ export function ScenesProvider({ children }: { children: ReactNode }) {
     return created;
   }, []);
 
+  const updateScene = useCallback(
+    (id: string, patch: Partial<Omit<Scene, 'id'>>) => {
+      setScenes((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, ...patch } : s)),
+      );
+    },
+    [],
+  );
+
+  const deleteScene = useCallback((id: string) => {
+    setScenes((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
   const value = useMemo<ScenesContextValue>(
-    () => ({ scenes, suggested: SUGGESTED_SCENES, addScene }),
-    [scenes, addScene],
+    () => ({
+      scenes,
+      suggested: SUGGESTED_SCENES,
+      addScene,
+      updateScene,
+      deleteScene,
+    }),
+    [scenes, addScene, updateScene, deleteScene],
   );
 
   return createElement(ScenesContext.Provider, { value }, children);
