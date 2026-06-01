@@ -204,10 +204,52 @@ export default function AutomationsScreen() {
             numColumns={2}
             scrollEnabled={false}
             columnWrapperStyle={{ gap: 12, marginBottom: 12 }}
-            renderItem={({ item }) => <TodaySceneCard scene={item} />}
+            renderItem={({ item }) => (
+              <TodaySceneCard
+                scene={item}
+                onPress={(s) => setAction({ sceneId: s.id })}
+              />
+            )}
           />
         </View>
       </ScrollView>
+
+      {/* Scene action sheet — Edit / Delete for an existing scene */}
+      <BottomSheet visible={action !== null} onClose={() => setAction(null)}>
+        <Text className="text-text font-semibold text-lg mb-1 text-center">
+          {actionScene?.name ?? 'Scene'}
+        </Text>
+        <Text className="text-textSecondary text-xs mb-5 text-center">
+          {actionScene
+            ? `${actionScene.time} ${actionScene.repeat}`
+            : ''}
+        </Text>
+        <View className="gap-3">
+          <Pressable
+            onPress={() => actionScene && startEdit(actionScene.id)}
+            className="bg-background border border-border rounded-2xl p-4 flex-row items-center"
+          >
+            <View className="w-10 h-10 rounded-full bg-primary/15 items-center justify-center">
+              <Ionicons name="create-outline" size={20} color={colors.primary} />
+            </View>
+            <Text className="text-text font-medium ml-3 flex-1">Edit scene</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </Pressable>
+          <Pressable
+            onPress={() => actionScene && confirmDelete(actionScene.id)}
+            className="bg-background border border-border rounded-2xl p-4 flex-row items-center"
+          >
+            <View
+              className="w-10 h-10 rounded-full items-center justify-center"
+              style={{ backgroundColor: 'rgba(226, 75, 74, 0.15)' }}
+            >
+              <Ionicons name="trash-outline" size={20} color={colors.error} />
+            </View>
+            <Text className="text-error font-medium ml-3 flex-1">Delete scene</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </Pressable>
+        </View>
+      </BottomSheet>
 
       {/* Step 1 — Add a Scene (suggested + Create New) */}
       <BottomSheet visible={step === 'add-scene'} onClose={closeAll}>
@@ -229,7 +271,10 @@ export default function AutomationsScreen() {
 
       {/* Step 2 — Scene name + schedule yes/no */}
       <BottomSheet visible={step === 'create-name'} onClose={closeAll}>
-        <StepHeader title="Add a Scene" onBack={() => setStep('add-scene')} />
+        <StepHeader
+          title={editingId ? 'Edit Scene' : 'Add a Scene'}
+          onBack={editingId ? closeAll : () => setStep('add-scene')}
+        />
         <Text className="text-textSecondary text-sm mb-2">Scene Name</Text>
         <View className="flex-row items-center bg-background border border-primary rounded-xl px-4 mb-5">
           <TextInput
@@ -273,8 +318,8 @@ export default function AutomationsScreen() {
           })}
         </View>
         <Button
-          label="Continue"
-          onPress={() => setStep('add-device')}
+          label={editingId ? 'Save' : 'Continue'}
+          onPress={editingId ? confirmScene : () => setStep('add-device')}
           disabled={!sceneName.trim() || !schedule}
         />
       </BottomSheet>
@@ -334,13 +379,15 @@ export default function AutomationsScreen() {
 
       <SuccessModal
         visible={step === 'success'}
-        title="Congratulation!"
+        title={editingId ? 'Saved!' : 'Congratulation!'}
         message={
-          pickedDevices.length === 1
-            ? `${pickedDevices[0].name} added to ${sceneName.trim() || 'scene'}!`
-            : `${pickedDevices.length} devices added to ${sceneName.trim() || 'scene'}!`
+          editingId
+            ? `${sceneName.trim() || 'Scene'} updated.`
+            : pickedDevices.length === 1
+              ? `${pickedDevices[0].name} added to ${sceneName.trim() || 'scene'}!`
+              : `${pickedDevices.length} devices added to ${sceneName.trim() || 'scene'}!`
         }
-        ctaLabel="Home"
+        ctaLabel={editingId ? 'Done' : 'Home'}
         onClose={closeAll}
       />
     </SafeAreaView>
