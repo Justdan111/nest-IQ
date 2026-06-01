@@ -75,14 +75,46 @@ export default function AutomationsScreen() {
   );
 
   const startCreate = () => {
+    setEditingId(null);
     setSceneName('');
     setSchedule(null);
     setPickedIds([]);
     setStep('add-scene');
   };
 
+  const startEdit = (id: string) => {
+    const scene = scenes.find((s) => s.id === id);
+    if (!scene) return;
+    setEditingId(id);
+    setSceneName(scene.name);
+    setSchedule(scene.time === 'Anytime' ? 'no' : 'yes');
+    setPickedIds([]);
+    setAction(null);
+    // Skip the suggested-scene picker on edit — go straight to the name step.
+    setStep('create-name');
+  };
+
+  const confirmDelete = (id: string) => {
+    const scene = scenes.find((s) => s.id === id);
+    if (!scene) return;
+    setAction(null);
+    Alert.alert(
+      'Delete scene?',
+      `"${scene.name}" will be removed.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteScene(id),
+        },
+      ],
+    );
+  };
+
   const closeAll = () => {
     setStep(null);
+    setEditingId(null);
     setSceneName('');
     setSchedule(null);
     setPickedIds([]);
@@ -99,15 +131,22 @@ export default function AutomationsScreen() {
     );
 
   const confirmScene = () => {
-    const idx = scenes.length % SCENE_PALETTE.length;
-    addScene({
-      name: sceneName.trim() || 'New Scene',
-      time: schedule === 'yes' ? 'Now' : 'Anytime',
-      repeat: schedule === 'yes' ? 'Today' : 'Once',
-      icon: 'flash',
-      color: SCENE_PALETTE[idx],
-      status: 'Scheduled',
-    });
+    const name = sceneName.trim() || 'New Scene';
+    const time = schedule === 'yes' ? 'Now' : 'Anytime';
+    const repeat = schedule === 'yes' ? 'Today' : 'Once';
+    if (editingId) {
+      updateScene(editingId, { name, time, repeat });
+    } else {
+      const idx = scenes.length % SCENE_PALETTE.length;
+      addScene({
+        name,
+        time,
+        repeat,
+        icon: 'flash',
+        color: SCENE_PALETTE[idx],
+        status: 'Scheduled',
+      });
+    }
     setStep('success');
   };
 
