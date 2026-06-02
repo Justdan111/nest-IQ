@@ -33,15 +33,32 @@ export interface Room {
   media?: RoomMedia[];
 }
 
+/**
+ * When a scene should fire. `weekdays` is 0..6 (Sun=0). An empty `weekdays`
+ * array means "once" (the next occurrence at the given time, then done).
+ */
+export interface SceneTrigger {
+  hour: number;
+  minute: number;
+  weekdays: number[];
+}
+
 export interface Scene {
   id: string;
   name: string;
+  /** Human-readable time, e.g. "7:00 am". Derived from `trigger`. */
   time: string;
+  /** Human-readable repeat label, e.g. "Everyday" / "Fri, Sat" / "Once". */
   repeat: string;
   icon: string;
   color: string;
   status: 'Scheduled' | 'Active';
-  devices?: Device[];
+  /** Devices this scene affects. */
+  deviceIds?: string[];
+  /** Structured trigger — drives scheduling and the display fields above. */
+  trigger?: SceneTrigger;
+  /** Notification handles returned by expo-notifications; used to cancel. */
+  notificationIds?: string[];
 }
 
 export interface User {
