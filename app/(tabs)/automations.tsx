@@ -22,7 +22,12 @@ import { useScenes } from '@/hooks/useScenes';
 import { useDevices } from '@/hooks/useDevices';
 import { useSidebar } from '@/components/ui/Sidebar';
 import { useTheme } from '@/hooks/useTheme';
-import type { Device } from '@/types';
+import { WheelPicker, range2 } from '@/components/device/WheelPicker';
+import {
+  formatSceneRepeat,
+  formatSceneTime,
+} from '@/utils/sceneFormatting';
+import type { Device, SceneTrigger } from '@/types';
 
 type Step =
   | null
@@ -59,6 +64,12 @@ export default function AutomationsScreen() {
   const [step, setStep] = useState<Step>(null);
   const [sceneName, setSceneName] = useState('');
   const [schedule, setSchedule] = useState<'yes' | 'no' | null>(null);
+  // Time picker state mirrors the WheelPicker shape used elsewhere: hour 1-12
+  // (index 0-11), minute 0-59, period 0=AM, 1=PM. Default 7:00 AM everyday.
+  const [trigHour, setTrigHour] = useState(6); // index → "07"
+  const [trigMinute, setTrigMinute] = useState(0);
+  const [trigPeriod, setTrigPeriod] = useState<0 | 1>(0);
+  const [trigWeekdays, setTrigWeekdays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [pickedIds, setPickedIds] = useState<string[]>([]);
   // When set, the multi-step flow saves into this scene instead of creating one.
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -74,11 +85,19 @@ export default function AutomationsScreen() {
     [devices, pickedIds],
   );
 
+  const resetTriggerToDefault = () => {
+    setTrigHour(6); // index for "07" in HOURS
+    setTrigMinute(0);
+    setTrigPeriod(0);
+    setTrigWeekdays([0, 1, 2, 3, 4, 5, 6]);
+  };
+
   const startCreate = () => {
     setEditingId(null);
     setSceneName('');
     setSchedule(null);
     setPickedIds([]);
+    resetTriggerToDefault();
     setStep('add-scene');
   };
 
@@ -87,10 +106,22 @@ export default function AutomationsScreen() {
     if (!scene) return;
     setEditingId(id);
     setSceneName(scene.name);
-    setSchedule(scene.time === 'Anytime' ? 'no' : 'yes');
-    setPickedIds([]);
+    setPickedIds(scene.deviceIds ?? []);
+    if (scene.trigger) {
+      const t = scene.trigger;
+      const period = t.hour >= 12 ? 1 : 0;
+      const h12 = t.hour % 12 === 0 ? 12 : t.hour % 12;
+      setTrigHour(h12 - 1);
+      setTrigMinute(t.minute);
+      setTrigPeriod(period);
+      setTrigWeekdays(t.weekdays);
+      setSchedule('yes');
+    } else {
+      resetTriggerToDefault();
+      setSchedule('no');
+    }
     setAction(null);
-    // Skip the suggested-scene picker on edit — go straight to the name step.
+    // Edit jumps straight to the name + time step.
     setStep('create-name');
   };
 
@@ -118,6 +149,26 @@ export default function AutomationsScreen() {
     setSceneName('');
     setSchedule(null);
     setPickedIds([]);
+    resetTriggerToDefault();
+  };
+
+  /** Build the structured trigger from the local picker state. */
+  const buildTrigger = (): SceneTrigger | undefined => {
+    if (schedule !== 'yes') return undefined;
+    const h12 = trigHour + 1; // 1-12
+    const hour24 =
+      trigPeriod === 1
+        ? h12 === 12
+          ? 12
+          : h12 + 12
+        : h12 === 12
+          ? 0
+          : h12;
+    return {
+      hour: hour24,
+      minute: trigMinute,
+      weekdays: [...trigWeekdays].sort((a, b) => a - b),
+    };
   };
 
   const pickSuggested = (name: string) => {
@@ -132,10 +183,17 @@ export default function AutomationsScreen() {
 
   const confirmScene = () => {
     const name = sceneName.trim() || 'New Scene';
-    const time = schedule === 'yes' ? 'Now' : 'Anytime';
-    const repeat = schedule === 'yes' ? 'Today' : 'Once';
+    const trigger = buildTrigger();
+    const time = trigger ? formatSceneTime(trigger) : 'Anytime';
+    const repeat = trigger ? formatSceneRepeat(trigger.weekdays) : 'Once';
     if (editingId) {
-      updateScene(editingId, { name, time, repeat });
+      updateScene(editingId, {
+        name,
+        time,
+        repeat,
+        trigger,
+        deviceIds: pickedIds,
+      });
     } else {
       const idx = scenes.length % SCENE_PALETTE.length;
       addScene({
@@ -145,6 +203,8 @@ export default function AutomationsScreen() {
         icon: 'flash',
         color: SCENE_PALETTE[idx],
         status: 'Scheduled',
+        trigger,
+        deviceIds: pickedIds,
       });
     }
     setStep('success');
@@ -317,9 +377,63 @@ export default function AutomationsScreen() {
             );
           })}
         </View>
+
+        {schedule === 'yes' ? (
+          <View className="mb-6">
+            <Text className="text-textSecondary text-sm mb-2">Time</Text>
+            <View className="flex-row items-center justify-center mb-4">
+              <WheelPicker
+                values={HOURS}
+                selectedIndex={trigHour}
+                onChange={setTrigHour}
+              />
+              <Text className="text-text text-3xl font-bold mx-1">:</Text>
+              <WheelPicker
+                values={MINUTES}
+                selectedIndex={trigMinute}
+                onChange={setTrigMinute}
+              />
+              <WheelPicker
+                width={64}
+                values={PERIODS}
+                selectedIndex={trigPeriod}
+                onChange={(i) => setTrigPeriod(i as 0 | 1)}
+              />
+            </View>
+            <Text className="text-textSecondary text-sm mb-2">Repeat</Text>
+            <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+              {WEEKDAY_LABELS.map((label, i) => {
+                const active = trigWeekdays.includes(i);
+                return (
+                  <Pressable
+                    key={label}
+                    onPress={() =>
+                      setTrigWeekdays((prev) =>
+                        prev.includes(i)
+                          ? prev.filter((d) => d !== i)
+                          : [...prev, i],
+                      )
+                    }
+                    className={`px-3 py-2 rounded-full ${active ? 'bg-primary' : 'bg-background border border-border'}`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${active ? 'text-white' : 'text-textSecondary'}`}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text className="text-textMuted text-xs mt-2">
+              No days selected = fire once at the next occurrence.
+            </Text>
+          </View>
+        ) : null}
+
         <Button
-          label={editingId ? 'Save' : 'Continue'}
-          onPress={editingId ? confirmScene : () => setStep('add-device')}
+          label="Continue"
+          onPress={() => setStep('add-device')}
           disabled={!sceneName.trim() || !schedule}
         />
       </BottomSheet>
