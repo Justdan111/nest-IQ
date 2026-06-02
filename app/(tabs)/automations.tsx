@@ -53,6 +53,12 @@ const TYPE_TINT: Record<NonNullable<Device['type']>, { bg: string; fg: string }>
 // Round-robin colors assigned to user-created scenes for the Today's grid.
 const SCENE_PALETTE = ['#1A1A1A', '#3B6FF0', '#C97E8A', '#5A8C95'];
 
+// WheelPicker values for the schedule time row.
+const HOURS = range2(1, 12);
+const MINUTES = range2(0, 59);
+const PERIODS: string[] = ['AM', 'PM'];
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
 export default function AutomationsScreen() {
   const router = useRouter();
   const { open } = useSidebar();
