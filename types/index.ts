@@ -61,6 +61,19 @@ export interface Scene {
   notificationIds?: string[];
 }
 
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  /** Epoch ms when the notification landed in the inbox. */
+  receivedAt: number;
+  read: boolean;
+  /** Optional source scene; used by the row icon and deep-link target. */
+  sceneId?: string;
+  /** Ionicons glyph for the row's leading bubble. */
+  icon?: string;
+}
+
 export interface User {
   id: string;
   name: string;
