@@ -17,6 +17,7 @@ import { AppStateProvider } from '@/hooks/useAppState';
 import { DevicesProvider } from '@/hooks/useDevices';
 import { RoomsProvider } from '@/hooks/useRooms';
 import { ScenesProvider } from '@/hooks/useScenes';
+import { NotificationsProvider } from '@/hooks/useNotifications';
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -35,20 +36,22 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
         <AppStateProvider>
-          <RoomsProvider>
-            <DevicesProvider>
-              <ScenesProvider>
-                <StatusBar style="auto" />
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: colors.background },
-                    animation: 'fade',
-                  }}
-                />
-              </ScenesProvider>
-            </DevicesProvider>
-          </RoomsProvider>
+          <NotificationsProvider>
+            <RoomsProvider>
+              <DevicesProvider>
+                <ScenesProvider>
+                  <StatusBar style="auto" />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.background },
+                      animation: 'fade',
+                    }}
+                  />
+                </ScenesProvider>
+              </DevicesProvider>
+            </RoomsProvider>
+          </NotificationsProvider>
         </AppStateProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
