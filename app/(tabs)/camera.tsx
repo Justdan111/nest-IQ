@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { CameraFeed } from '@/components/camera/CameraFeed';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 
 type Cam = {
@@ -81,11 +82,7 @@ export default function CameraScreen() {
             <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
           <Text className="text-text font-semibold text-lg">Real Time</Text>
-          <Pressable hitSlop={10}>
-            <View className="w-9 h-9 rounded-full bg-surface items-center justify-center">
-              <Ionicons name="notifications-outline" size={20} color={colors.text} />
-            </View>
-          </Pressable>
+          <NotificationBell bubble />
         </View>
 
         {/* Hero feed — tap to expand */}

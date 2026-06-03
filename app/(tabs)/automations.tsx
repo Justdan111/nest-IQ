@@ -21,6 +21,7 @@ import { LabeledToggle } from '@/components/ui/DeviceToggleRow';
 import { useScenes } from '@/hooks/useScenes';
 import { useDevices } from '@/hooks/useDevices';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 import { WheelPicker, range2 } from '@/components/device/WheelPicker';
 import {
@@ -227,11 +228,7 @@ export default function AutomationsScreen() {
             <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
           <Text className="text-text font-semibold text-lg">Automations</Text>
-          <Pressable hitSlop={10}>
-            <View className="w-9 h-9 rounded-full bg-surface items-center justify-center">
-              <Ionicons name="notifications-outline" size={20} color={colors.text} />
-            </View>
-          </Pressable>
+          <NotificationBell bubble />
         </View>
 
         <View className="px-5">

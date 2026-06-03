@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EnergyBar } from '@/components/statistic/EnergyBar';
 import { ConsumptionRow } from '@/components/statistic/ConsumptionRow';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 
 type Period = 'daily' | 'weekly' | 'monthly';
@@ -98,9 +99,7 @@ export default function StatisticScreen() {
             <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
           <Text className="text-text font-semibold text-lg">Statistic</Text>
-          <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
-          </Pressable>
+          <NotificationBell />
         </View>
 
         <View className="px-5 flex-row gap-3 mb-6">

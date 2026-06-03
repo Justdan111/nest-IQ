@@ -7,6 +7,7 @@ import { CircularTempSlider } from '@/components/device/CircularTempSlider';
 import { DeviceCard } from '@/components/ui/DeviceCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 import { controlRouteForDevice } from '@/components/device/controlRoute';
 
@@ -29,9 +30,7 @@ export default function DeviceScreen() {
             <Ionicons name="menu" size={26} color={colors.text} />
           </Pressable>
           <Text className="text-text font-semibold text-lg">Device</Text>
-          <Pressable hitSlop={10}>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
-          </Pressable>
+          <NotificationBell />
         </View>
 
         <View className="items-center mt-6 mb-4">
