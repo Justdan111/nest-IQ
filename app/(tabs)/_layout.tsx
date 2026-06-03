@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SidebarProvider } from '@/components/ui/Sidebar';
+import { TabHeader } from '@/components/ui/TabHeader';
 import { useTheme } from '@/hooks/useTheme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -112,10 +113,34 @@ export default function TabsLayout() {
         }}
       >
         <Tabs.Screen name="index" />
-        <Tabs.Screen name="device" />
-        <Tabs.Screen name="statistic" />
-        <Tabs.Screen name="automations" />
-        <Tabs.Screen name="camera" />
+        <Tabs.Screen
+          name="device"
+          options={{
+            headerShown: true,
+            header: () => <TabHeader title="Device" />,
+          }}
+        />
+        <Tabs.Screen
+          name="statistic"
+          options={{
+            headerShown: true,
+            header: () => <TabHeader title="Statistic" />,
+          }}
+        />
+        <Tabs.Screen
+          name="automations"
+          options={{
+            headerShown: true,
+            header: () => <TabHeader title="Automations" bellBubble />,
+          }}
+        />
+        <Tabs.Screen
+          name="camera"
+          options={{
+            headerShown: true,
+            header: () => <TabHeader title="Real Time" bellBubble />,
+          }}
+        />
       </Tabs>
     </SidebarProvider>
   );
