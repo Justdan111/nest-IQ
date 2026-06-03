@@ -12,9 +12,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { CameraFeed } from '@/components/camera/CameraFeed';
-import { useSidebar } from '@/components/ui/Sidebar';
-import { NotificationBell } from '@/components/ui/NotificationBell';
-import { useTheme } from '@/hooks/useTheme';
 
 type Cam = {
   id: string;
@@ -63,28 +60,17 @@ const CAMERAS: Cam[] = [
 ];
 
 export default function CameraScreen() {
-  const { open } = useSidebar();
-  const { colors } = useTheme();
-
   const [activeId, setActiveId] = useState<string>(CAMERAS[1].id); // Bed Room by default to match mockup
   const [fullscreen, setFullscreen] = useState(false);
 
   const active = CAMERAS.find((c) => c.id === activeId) ?? CAMERAS[0];
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+    <View className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }}
       >
-        <View className="flex-row items-center justify-between px-5 pt-2 mb-4">
-          <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color={colors.text} />
-          </Pressable>
-          <Text className="text-text font-semibold text-lg">Real Time</Text>
-          <NotificationBell bubble />
-        </View>
-
         {/* Hero feed — tap to expand */}
         <Pressable onPress={() => setFullscreen(true)} className="mx-5 mb-6">
           <CameraFeed
@@ -158,7 +144,7 @@ export default function CameraScreen() {
         camera={active}
         onClose={() => setFullscreen(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

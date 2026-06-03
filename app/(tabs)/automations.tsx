@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { TodaySceneCard } from '@/components/automations/TodaySceneCard';
 import { SceneRow } from '@/components/automations/SceneRow';
@@ -20,8 +19,6 @@ import { SuccessModal } from '@/components/ui/SuccessModal';
 import { LabeledToggle } from '@/components/ui/DeviceToggleRow';
 import { useScenes } from '@/hooks/useScenes';
 import { useDevices } from '@/hooks/useDevices';
-import { useSidebar } from '@/components/ui/Sidebar';
-import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 import { WheelPicker, range2 } from '@/components/device/WheelPicker';
 import {
@@ -62,7 +59,6 @@ const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as cons
 
 export default function AutomationsScreen() {
   const router = useRouter();
-  const { open } = useSidebar();
   const { colors } = useTheme();
   const { scenes, suggested, addScene, updateScene, deleteScene } = useScenes();
   const { devices } = useDevices();
@@ -218,19 +214,11 @@ export default function AutomationsScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+    <View className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }}
       >
-        <View className="flex-row items-center justify-between px-5 pt-2 mb-6">
-          <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color={colors.text} />
-          </Pressable>
-          <Text className="text-text font-semibold text-lg">Automations</Text>
-          <NotificationBell bubble />
-        </View>
-
         <View className="px-5">
           <SectionHeader
             title="Scenes"
@@ -507,7 +495,7 @@ export default function AutomationsScreen() {
         ctaLabel={editingId ? 'Done' : 'Home'}
         onClose={closeAll}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

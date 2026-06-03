@@ -8,11 +8,8 @@ import {
 } from 'react-native';
 import type { View as RNView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { EnergyBar } from '@/components/statistic/EnergyBar';
 import { ConsumptionRow } from '@/components/statistic/ConsumptionRow';
-import { useSidebar } from '@/components/ui/Sidebar';
-import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useTheme } from '@/hooks/useTheme';
 
 type Period = 'daily' | 'weekly' | 'monthly';
@@ -83,25 +80,14 @@ const CONSUMPTION = [
 ];
 
 export default function StatisticScreen() {
-  const { open } = useSidebar();
-  const { colors } = useTheme();
-
   const [period, setPeriod] = useState<Period>('daily');
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+    <View className="flex-1 bg-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }}
       >
-        <View className="flex-row items-center justify-between px-5 pt-2 mb-6">
-          <Pressable onPress={open} hitSlop={10}>
-            <Ionicons name="menu" size={26} color={colors.text} />
-          </Pressable>
-          <Text className="text-text font-semibold text-lg">Statistic</Text>
-          <NotificationBell />
-        </View>
-
         <View className="px-5 flex-row gap-3 mb-6">
           <View className="flex-1 bg-surface rounded-2xl p-4 flex-row items-center">
             <View className="w-11 h-11 rounded-full bg-warning/15 items-center justify-center">
@@ -143,7 +129,7 @@ export default function StatisticScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
