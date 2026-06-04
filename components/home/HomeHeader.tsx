@@ -2,6 +2,8 @@ import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSidebar } from '@/components/ui/Sidebar';
+import { Avatar } from '@/components/ui/Avatar';
+import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -15,6 +17,7 @@ export function HomeHeader({ name, onMenu, onBell }: Props) {
   const router = useRouter();
   const { open } = useSidebar();
   const { colors } = useTheme();
+  const { user } = useAppState();
   const { unreadCount } = useNotifications();
   const goNotifications = onBell ?? (() => router.push('/notifications'));
   return (
@@ -33,11 +36,7 @@ export function HomeHeader({ name, onMenu, onBell }: Props) {
         </Pressable>
       </View>
       <View className="flex-row items-center mb-6">
-        <View className="w-12 h-12 rounded-full bg-primary items-center justify-center">
-          <Text className="text-white font-semibold text-lg">
-            {name.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+        <Avatar uri={user.avatar} name={name} size={48} />
         <View className="ml-3">
           <Text className="text-text font-semibold text-xl">Hi, {name}</Text>
           <Text className="text-textSecondary text-sm">

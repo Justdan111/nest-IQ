@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
-import { initials } from '@/utils/initials';
+import { Avatar } from '@/components/ui/Avatar';
 
 const { width } = Dimensions.get('window');
 const PANEL_WIDTH = Math.min(width * 0.82, 340);
@@ -126,11 +126,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
               {/* Profile block */}
               <View className="mt-6 mb-8">
                 <View className="flex-row items-center">
-                  <View className="w-16 h-16 rounded-full bg-primary items-center justify-center">
-                    <Text className="text-white font-bold text-xl">
-                      {initials(user.name)}
-                    </Text>
-                  </View>
+                  <Avatar uri={user.avatar} name={user.name} size={64} />
                   <View className="ml-3 flex-1">
                     <Text className="text-text font-bold text-lg" numberOfLines={1}>
                       {user.name}

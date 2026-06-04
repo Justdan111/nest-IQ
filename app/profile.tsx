@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
+import { Avatar } from '@/components/ui/Avatar';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
-import { initials } from '@/utils/initials';
 
 export default function ProfileEditScreen() {
   const router = useRouter();
@@ -17,6 +19,10 @@ export default function ProfileEditScreen() {
   const [email, setEmail] = useState(user.email);
   const [address, setAddress] = useState(user.address);
   const [homeName, setHomeName] = useState(user.homeName);
+  const [avatar, setAvatar] = useState<string | undefined>(user.avatar);
+
+  // Avatar source picker — shown when the user taps the pencil badge.
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const save = () => {
     setUser({
@@ -25,8 +31,48 @@ export default function ProfileEditScreen() {
       email: email.trim(),
       address: address.trim(),
       homeName: homeName.trim(),
+      avatar,
     });
     router.back();
+  };
+
+  const pickFromLibrary = async () => {
+    setPickerOpen(false);
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow photo library access.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    setAvatar(result.assets[0].uri);
+  };
+
+  const captureFromCamera = async () => {
+    setPickerOpen(false);
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow camera access.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    setAvatar(result.assets[0].uri);
+  };
+
+  const clearAvatar = () => {
+    setPickerOpen(false);
+    setAvatar(undefined);
   };
 
   return (
@@ -50,16 +96,19 @@ export default function ProfileEditScreen() {
       >
         <View className="items-center mt-4 mb-6">
           <View
-            className="w-28 h-28 rounded-full items-center justify-center"
-            style={{ borderWidth: 3, borderColor: colors.primary }}
+            className="rounded-full items-center justify-center"
+            style={{
+              width: 112,
+              height: 112,
+              borderWidth: 3,
+              borderColor: colors.primary,
+            }}
           >
-            <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
-              <Text className="text-white font-bold text-3xl">
-                {initials(name)}
-              </Text>
-            </View>
+            <Avatar uri={avatar} name={name} size={96} />
             <Pressable
+              onPress={() => setPickerOpen(true)}
               hitSlop={6}
+              accessibilityLabel="Change profile photo"
               className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-primary items-center justify-center"
               style={{ borderWidth: 3, borderColor: colors.background }}
             >
@@ -104,7 +153,73 @@ export default function ProfileEditScreen() {
           </View>
         </View>
       </SafeAreaView>
+
+      {/* Avatar source picker */}
+      <BottomSheet visible={pickerOpen} onClose={() => setPickerOpen(false)}>
+        <Text className="text-text font-semibold text-lg mb-4 text-center">
+          Profile Photo
+        </Text>
+        <View className="gap-3">
+          <SourceRow
+            icon="image-outline"
+            label="Choose from Library"
+            onPress={pickFromLibrary}
+          />
+          <SourceRow
+            icon="camera-outline"
+            label="Take Photo"
+            onPress={captureFromCamera}
+          />
+          {avatar ? (
+            <SourceRow
+              icon="trash-outline"
+              label="Remove Photo"
+              destructive
+              onPress={clearAvatar}
+            />
+          ) : null}
+        </View>
+      </BottomSheet>
     </View>
+  );
+}
+
+function SourceRow({
+  icon,
+  label,
+  destructive,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  destructive?: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
+  const tint = destructive ? colors.error : colors.primary;
+  return (
+    <Pressable
+      onPress={onPress}
+      className="bg-background border border-border rounded-2xl p-4 flex-row items-center"
+    >
+      <View
+        className="w-10 h-10 rounded-full items-center justify-center"
+        style={{
+          backgroundColor: destructive
+            ? 'rgba(226, 75, 74, 0.15)'
+            : `${colors.primary}26`,
+        }}
+      >
+        <Ionicons name={icon} size={20} color={tint} />
+      </View>
+      <Text
+        className="font-medium ml-3 flex-1"
+        style={{ color: destructive ? colors.error : colors.text }}
+      >
+        {label}
+      </Text>
+      <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+    </Pressable>
   );
 }
 
