@@ -1,15 +1,16 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
   Image,
   Modal,
   Pressable,
-  Text,
   View,
+  type ViewToken,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import type { RoomMedia } from '@/types';
 
 type Props = {
@@ -21,8 +22,9 @@ type Props = {
 
 /**
  * Fullscreen, edge-to-edge media viewer. Horizontally pageable across the
- * supplied items; tapping anywhere on the image dismisses. Videos render a
- * placeholder card — full video playback isn't wired (no expo-av in deps).
+ * supplied items. Images render via RN <Image>; videos render via expo-video's
+ * <VideoView>, with playback paused for off-screen pages so only the visible
+ * video plays at a time.
  */
 export function ImageViewer({
   visible,
@@ -32,6 +34,20 @@ export function ImageViewer({
 }: Props) {
   const ref = useRef<FlatList<RoomMedia>>(null);
   const { width, height } = Dimensions.get('window');
+  const [activeIndex, setActiveIndex] = useState(initialIndex);
+
+  // Reset when the modal opens so the index reflects the requested item.
+  useEffect(() => {
+    if (visible) setActiveIndex(initialIndex);
+  }, [visible, initialIndex]);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems[0]?.index != null) {
+        setActiveIndex(viewableItems[0].index);
+      }
+    },
+  ).current;
 
   return (
     <Modal
@@ -67,33 +83,84 @@ export function ImageViewer({
             offset: width * index,
             index,
           })}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={onClose}
-              style={{ width, height }}
-              className="items-center justify-center"
-            >
-              {item.type === 'video' ? (
-                <View className="items-center">
-                  <View className="w-20 h-20 rounded-full bg-white/15 items-center justify-center mb-3">
-                    <Ionicons name="play" size={32} color="#fff" />
-                  </View>
-                  <Text className="text-white/80 text-sm">Video preview</Text>
-                  <Text className="text-white/40 text-xs mt-1" numberOfLines={1}>
-                    {item.uri.split('/').pop()}
-                  </Text>
-                </View>
-              ) : (
-                <Image
-                  source={{ uri: item.uri }}
-                  style={{ width, height }}
-                  resizeMode="contain"
-                />
-              )}
-            </Pressable>
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
+          renderItem={({ item, index }) => (
+            <MediaPage
+              media={item}
+              isActive={index === activeIndex}
+              width={width}
+              height={height}
+              onTapImage={onClose}
+            />
           )}
         />
       </View>
     </Modal>
+  );
+}
+
+function MediaPage({
+  media,
+  isActive,
+  width,
+  height,
+  onTapImage,
+}: {
+  media: RoomMedia;
+  isActive: boolean;
+  width: number;
+  height: number;
+  onTapImage: () => void;
+}) {
+  if (media.type === 'video') {
+    return <VideoPage uri={media.uri} isActive={isActive} width={width} height={height} />;
+  }
+  return (
+    <Pressable
+      onPress={onTapImage}
+      style={{ width, height }}
+      className="items-center justify-center"
+    >
+      <Image
+        source={{ uri: media.uri }}
+        style={{ width, height }}
+        resizeMode="contain"
+      />
+    </Pressable>
+  );
+}
+
+function VideoPage({
+  uri,
+  isActive,
+  width,
+  height,
+}: {
+  uri: string;
+  isActive: boolean;
+  width: number;
+  height: number;
+}) {
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+  });
+
+  // Pause off-screen pages so only the visible video plays.
+  useEffect(() => {
+    if (isActive) player.play();
+    else player.pause();
+  }, [isActive, player]);
+
+  return (
+    <View style={{ width, height }} className="items-center justify-center">
+      <VideoView
+        player={player}
+        style={{ width, height }}
+        contentFit="contain"
+        allowsFullscreen
+        nativeControls
+      />
+    </View>
   );
 }
