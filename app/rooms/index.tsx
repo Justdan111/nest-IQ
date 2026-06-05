@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView,  Text, TextInput, View,} from 'react-native';
+import { Alert, Image, Pressable, ScrollView,  Text, TextInput, View,} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -13,6 +14,9 @@ import { SuccessModal } from '@/components/ui/SuccessModal';
 import type { Category, Room } from '@/types';
 
 type Step = null | 'name' | 'category' | 'photos' | 'devices' | 'success';
+
+// Source picker sheet shown when the user taps "Take New Photo".
+type PhotoSource = null | 'choose';
 
 const DEVICE_TYPES: {
   id: string;
@@ -59,30 +63,75 @@ export default function RoomsScreen() {
   const [roomName, setRoomName] = useState('');
   const [roomCategory, setRoomCategory] = useState<string>(selectedCategoryId);
   const [photos, setPhotos] = useState<number[]>([]);
+  const [customPhotos, setCustomPhotos] = useState<string[]>([]);
+  const [photoSource, setPhotoSource] = useState<PhotoSource>(null);
   const [types, setTypes] = useState<string[]>([]);
 
   const openAddRoom = () => {
     setRoomName('');
     setRoomCategory(selectedCategoryId);
     setPhotos([]);
+    setCustomPhotos([]);
     setTypes([]);
     setStep('name');
   };
   const closeAddRoom = () => setStep(null);
 
   const finalize = () => {
+    // Prefer the first preset the user explicitly selected; otherwise fall back
+    // to their first captured/picked photo; otherwise the default preset.
+    const heroImage =
+      photos.length > 0
+        ? PHOTO_OPTIONS[photos[0]]
+        : customPhotos.length > 0
+          ? { uri: customPhotos[0] }
+          : PHOTO_OPTIONS[0];
     addRoom({
       categoryId: roomCategory,
       name: roomName.trim(),
-      image: photos.length > 0 ? PHOTO_OPTIONS[photos[0]] : PHOTO_OPTIONS[0],
+      image: heroImage,
+      media: customPhotos.map((uri) => ({ uri, type: 'image' })),
     });
     setStep('success');
   };
 
   const togglePhoto = (i: number) =>
     setPhotos((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
+  const removeCustomPhoto = (uri: string) =>
+    setCustomPhotos((p) => p.filter((x) => x !== uri));
   const toggleType = (id: string) =>
     setTypes((t) => (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]));
+
+  const pickFromLibrary = async () => {
+    setPhotoSource(null);
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow photo library access.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+      allowsMultipleSelection: true,
+    });
+    if (result.canceled) return;
+    setCustomPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+  };
+
+  const captureFromCamera = async () => {
+    setPhotoSource(null);
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow camera access.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    setCustomPhotos((prev) => [...prev, result.assets[0].uri]);
+  };
 
   const submitNewCategory = () => {
     const name = newCategoryName.trim();
@@ -208,7 +257,10 @@ export default function RoomsScreen() {
         {step === 'photos' ? (
           <PhotosStep
             selected={photos}
+            customPhotos={customPhotos}
             onToggle={togglePhoto}
+            onRemoveCustom={removeCustomPhoto}
+            onPickNew={() => setPhotoSource('choose')}
             onBack={() => setStep('category')}
             onContinue={() => setStep('devices')}
           />
@@ -231,7 +283,53 @@ export default function RoomsScreen() {
           setStep(null);
         }}
       />
+
+      {/* Photo source picker — opened by the "Take New Photo" tile. */}
+      <BottomSheet
+        visible={photoSource === 'choose'}
+        onClose={() => setPhotoSource(null)}
+      >
+        <Text className="text-text font-semibold text-lg mb-4 text-center">
+          Add Photo
+        </Text>
+        <View className="gap-3">
+          <PhotoSourceRow
+            icon="image-outline"
+            label="Choose from Library"
+            onPress={pickFromLibrary}
+          />
+          <PhotoSourceRow
+            icon="camera-outline"
+            label="Take Photo"
+            onPress={captureFromCamera}
+          />
+        </View>
+      </BottomSheet>
     </View>
+  );
+}
+
+function PhotoSourceRow({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      className="bg-background border border-border rounded-2xl p-4 flex-row items-center"
+    >
+      <View className="w-10 h-10 rounded-full bg-primary/15 items-center justify-center">
+        <Ionicons name={icon} size={20} color={colors.primary} />
+      </View>
+      <Text className="text-text font-medium ml-3 flex-1">{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+    </Pressable>
   );
 }
 
@@ -457,65 +555,94 @@ function CategoryStep({
 
 function PhotosStep({
   selected,
+  customPhotos,
   onToggle,
+  onRemoveCustom,
+  onPickNew,
   onBack,
   onContinue,
 }: {
   selected: number[];
+  customPhotos: string[];
   onToggle: (i: number) => void;
+  onRemoveCustom: (uri: string) => void;
+  onPickNew: () => void;
   onBack: () => void;
   onContinue: () => void;
 }) {
   const { colors } = useTheme();
+  const canContinue = selected.length > 0 || customPhotos.length > 0;
   return (
     <View>
       <StepHeader title="Add Photos" onBack={onBack} />
-      <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-        {PHOTO_OPTIONS.map((src, i) => {
-          const active = selected.includes(i);
-          return (
-            <Pressable
-              key={i}
-              onPress={() => onToggle(i)}
+      <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+        <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+          {PHOTO_OPTIONS.map((src, i) => {
+            const active = selected.includes(i);
+            return (
+              <Pressable
+                key={`preset-${i}`}
+                onPress={() => onToggle(i)}
+                style={{ width: '47%', aspectRatio: 1 }}
+                className="rounded-2xl overflow-hidden"
+              >
+                <Image
+                  source={src}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+                {active ? (
+                  <View className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-white items-center justify-center">
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })}
+          {customPhotos.map((uri) => (
+            <View
+              key={`custom-${uri}`}
               style={{ width: '47%', aspectRatio: 1 }}
               className="rounded-2xl overflow-hidden"
             >
               <Image
-                source={src}
+                source={{ uri }}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />
-              {active ? (
-                <View className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-white items-center justify-center">
-                  <Ionicons name="checkmark" size={16} color={colors.primary} />
-                </View>
-              ) : null}
-            </Pressable>
-          );
-        })}
-        <View
-          style={{
-            width: '47%',
-            aspectRatio: 1,
-            borderStyle: 'dashed',
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 16,
-          }}
-          className="bg-background items-center justify-center"
-        >
-          <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-            <Ionicons name="camera-outline" size={20} color="#fff" />
-          </View>
-          <Text className="text-text text-xs mt-2">Take New Photo</Text>
+              <View className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-white items-center justify-center">
+                <Ionicons name="checkmark" size={16} color={colors.primary} />
+              </View>
+              <Pressable
+                onPress={() => onRemoveCustom(uri)}
+                hitSlop={8}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/55 items-center justify-center"
+              >
+                <Ionicons name="close" size={14} color="#fff" />
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            onPress={onPickNew}
+            style={{
+              width: '47%',
+              aspectRatio: 1,
+              borderStyle: 'dashed',
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: 16,
+            }}
+            className="bg-background items-center justify-center"
+          >
+            <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+              <Ionicons name="camera-outline" size={20} color="#fff" />
+            </View>
+            <Text className="text-text text-xs mt-2">Take New Photo</Text>
+          </Pressable>
         </View>
-      </View>
+      </ScrollView>
       <View className="mt-6">
-        <Button
-          label="Continue"
-          onPress={onContinue}
-          disabled={selected.length === 0}
-        />
+        <Button label="Continue" onPress={onContinue} disabled={!canContinue} />
       </View>
     </View>
   );
