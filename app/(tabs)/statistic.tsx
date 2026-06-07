@@ -1,8 +1,5 @@
 import { useRef, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView, Text, View, } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View, } from 'react-native';
 import type { View as RNView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { EnergyBar } from '@/components/statistic/EnergyBar';
