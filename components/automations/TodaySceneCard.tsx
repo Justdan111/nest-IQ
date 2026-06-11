@@ -10,7 +10,6 @@ type Props = {
 
 export function TodaySceneCard({ scene, onPress }: Props) {
   const { colors } = useTheme();
-  // Scenes flagged "#1A1A1A" are neutral cards — they follow the theme surface.
   const neutral = scene.color === '#1A1A1A';
   const bg = neutral ? colors.surface : scene.color;
   const fg = neutral ? colors.text : '#fff';
