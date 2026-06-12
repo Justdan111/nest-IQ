@@ -16,6 +16,7 @@ export function TodaySceneCard({ scene, onPress }: Props) {
   const fgMuted = neutral ? colors.textSecondary : 'rgba(255,255,255,0.8)';
   const iconBg = neutral ? colors.surfaceAlt : 'rgba(255,255,255,0.2)';
 
+  
   return (
     <Pressable
       onPress={() => onPress?.(scene)}
