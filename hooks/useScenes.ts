@@ -13,8 +13,7 @@ import { SCENES, SUGGESTED_SCENES } from '@/constants/Scenes';
 import type { Scene } from '@/types';
 import {
   cancelAllSceneNotifications,
-  cancelSceneNotifications,
-  scheduleScene, } from '@/services/sceneScheduler';
+  cancelSceneNotifications, scheduleScene, } from '@/services/sceneScheduler';
 
 type NewScene = Omit<Scene, 'id'> & { id?: string };
 
