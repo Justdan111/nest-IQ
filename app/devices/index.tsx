@@ -8,6 +8,7 @@ import { DeviceCard } from '@/components/ui/DeviceCard';
 import { DeviceToggleRow } from '@/components/ui/DeviceToggleRow';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { controlRouteForDevice } from '@/components/device/controlRoute';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 /**
  * Full inventory of every device in the home. Reached from the Device tab via
@@ -49,15 +50,14 @@ export default function DeviceListScreen() {
             onAction={() => router.push('/devices/add')}
           />
           {devices.length === 0 ? (
-            <View className="bg-surface rounded-2xl p-8 items-center mt-2">
-              <Ionicons
-                name="hardware-chip-outline"
-                size={28}
-                color={colors.textSecondary}
+            <View className="mt-2">
+              <EmptyState
+                icon="hardware-chip-outline"
+                title="No devices yet"
+                message="Add your first device to control lights, AC, cameras and more."
+                ctaLabel="Add new device"
+                onCtaPress={() => router.push('/devices/add')}
               />
-              <Text className="text-textSecondary text-sm mt-2 text-center">
-                No devices yet. Tap Add New to get started.
-              </Text>
             </View>
           ) : (
             <View className="flex-row flex-wrap" style={{ gap: 12 }}>

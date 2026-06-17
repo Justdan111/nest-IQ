@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import type { Device } from '@/types';
+import { haptic } from '@/utils/haptics';
 
 type Props = {
   device: Device;
@@ -47,7 +48,11 @@ export function DeviceToggleRow({ device, onToggle, onPress }: Props) {
 export function LabeledToggle({ value, onPress }: { value: boolean; onPress: () => void }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        // Quick selection buzz on every state flip — feels like a real switch.
+        haptic('selection');
+        onPress();
+      }}
       style={{
         width: 64,
         height: 32,

@@ -2,6 +2,7 @@ import { Pressable, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Device } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
+import { haptic } from '@/utils/haptics';
 
 type Props = {
   device: Device;
@@ -31,7 +32,10 @@ export function DeviceCard({ device, onToggle, onPress }: Props) {
         </View>
         <Switch
           value={device.isOn}
-          onValueChange={() => onToggle(device.id)}
+          onValueChange={() => {
+            haptic('selection');
+            onToggle(device.id);
+          }}
           trackColor={{ true: 'rgba(255,255,255,0.25)', false: colors.surfaceAlt }}
           thumbColor={device.isOn ? '#FFFFFF' : colors.textSecondary}
           ios_backgroundColor={active ? 'rgba(255,255,255,0.25)' : colors.surfaceAlt}

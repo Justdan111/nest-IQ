@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useTheme } from '@/hooks/useTheme';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { AppNotification } from '@/types';
 
 export default function NotificationsScreen() {
@@ -56,21 +57,12 @@ export default function NotificationsScreen() {
       </SafeAreaView>
 
       {notifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <View className="w-20 h-20 rounded-full bg-surface items-center justify-center">
-            <Ionicons
-              name="notifications-off-outline"
-              size={32}
-              color={colors.textSecondary}
-            />
-          </View>
-          <Text className="text-text font-semibold text-lg mt-4">
-            You're all caught up
-          </Text>
-          <Text className="text-textSecondary text-sm mt-2 text-center">
-            New activity from your scenes and devices will show up here.
-          </Text>
-        </View>
+        <EmptyState
+          variant="page"
+          icon="notifications-off-outline"
+          title="You're all caught up"
+          message="New activity from your scenes and devices will show up here."
+        />
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
