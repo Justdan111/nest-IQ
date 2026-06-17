@@ -13,6 +13,7 @@ import { ColorPicker } from '@/components/device/ColorPicker';
 import { ToneGlowToggle } from '@/components/device/ToneGlowToggle';
 import { IntensitySlider } from '@/components/device/IntensitySlider';
 import { WheelPicker, range2 } from '@/components/device/WheelPicker';
+import { haptic } from '@/utils/haptics';
 
 const HOURS = range2(1, 12);
 const MIN_SEC = range2(0, 59);
@@ -161,7 +162,11 @@ export default function LightControlScreen() {
               <Text className="text-textSecondary text-sm">{roomName}</Text>
             </View>
             <Pressable
-              onPress={() => device && toggleDevice(device.id)}
+              onPress={() => {
+                if (!device) return;
+                haptic('medium');
+                toggleDevice(device.id);
+              }}
               hitSlop={6}
               className={`w-11 h-11 rounded-full items-center justify-center ${isOn ? 'bg-primary' : 'bg-surface border border-border'}`}
             >

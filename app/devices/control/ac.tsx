@@ -12,6 +12,7 @@ import { RoomFilterPills } from '@/components/ui/RoomFilterPill';
 import { CircularTempSlider } from '@/components/device/CircularTempSlider';
 import { MoodSelector } from '@/components/device/MoodSelector';
 import { WheelPicker, range2 } from '@/components/device/WheelPicker';
+import { haptic } from '@/utils/haptics';
 
 type Mood = 'cool' | 'heat' | 'wind' | 'auto';
 type Period = 'AM' | 'PM';
@@ -97,7 +98,11 @@ export default function AcControlScreen() {
             <Text className="text-text font-semibold text-lg">Select Mood</Text>
             <PowerButton
               isOn={isOn}
-              onPress={() => device && toggleDevice(device.id)}
+              onPress={() => {
+                if (!device) return;
+                haptic('medium');
+                toggleDevice(device.id);
+              }}
             />
           </View>
           <MoodSelector selected={mood} onSelect={setMood} />

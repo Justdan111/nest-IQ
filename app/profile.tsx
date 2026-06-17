@@ -9,6 +9,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/components/ui/Avatar';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
+import { haptic } from '@/utils/haptics';
 
 export default function ProfileEditScreen() {
   const router = useRouter();
@@ -20,11 +22,19 @@ export default function ProfileEditScreen() {
   const [address, setAddress] = useState(user.address);
   const [homeName, setHomeName] = useState(user.homeName);
   const [avatar, setAvatar] = useState<string | undefined>(user.avatar);
+  const [saving, setSaving] = useState(false);
+
+  const toast = useToast();
 
   // Avatar source picker — shown when the user taps the pencil badge.
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const save = () => {
+  const save = async () => {
+    if (saving) return;
+    setSaving(true);
+    // Simulate the network round-trip a real backend would have. Even with
+    // local-only state the brief spinner makes the action feel committed.
+    await new Promise((r) => setTimeout(r, 500));
     setUser({
       ...user,
       name: name.trim() || user.name,
@@ -33,6 +43,9 @@ export default function ProfileEditScreen() {
       homeName: homeName.trim(),
       avatar,
     });
+    haptic('success');
+    toast.success('Profile updated');
+    setSaving(false);
     router.back();
   };
 
@@ -146,10 +159,15 @@ export default function ProfileEditScreen() {
       <SafeAreaView edges={['bottom']} className="px-5 pb-3">
         <View className="flex-row gap-3">
           <View className="flex-1">
-            <Button label="Cancel" variant="outline" onPress={() => router.back()} />
+            <Button
+              label="Cancel"
+              variant="outline"
+              onPress={() => router.back()}
+              disabled={saving}
+            />
           </View>
           <View className="flex-1">
-            <Button label="Save" onPress={save} />
+            <Button label="Save" onPress={save} loading={saving} />
           </View>
         </View>
       </SafeAreaView>

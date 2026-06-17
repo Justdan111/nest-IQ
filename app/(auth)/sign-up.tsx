@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { useTheme } from '@/hooks/useTheme';
+import { haptic } from '@/utils/haptics';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -17,8 +18,17 @@ export default function SignUpScreen() {
   const [accept, setAccept] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [showCongrats, setShowCongrats] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = () => setShowCongrats(true);
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    // Stand-in for the account-creation round-trip.
+    await new Promise((r) => setTimeout(r, 800));
+    setSubmitting(false);
+    haptic('success');
+    setShowCongrats(true);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -80,7 +90,12 @@ export default function SignUpScreen() {
         </Pressable>
 
         <View className="mt-8">
-          <Button label="Sign Up" onPress={submit} disabled={!accept} />
+          <Button
+            label="Sign Up"
+            onPress={submit}
+            disabled={!accept || submitting}
+            loading={submitting}
+          />
         </View>
         <View className="flex-row items-center justify-center mt-4">
           <Text className="text-textSecondary text-sm">Already have an account?</Text>

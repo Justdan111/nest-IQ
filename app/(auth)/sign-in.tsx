@@ -5,13 +5,27 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/hooks/useTheme';
+import { useToast } from '@/components/ui/Toast';
+import { haptic } from '@/utils/haptics';
 
 export default function SignInScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    // Stand-in for the auth round-trip a real backend would do.
+    await new Promise((r) => setTimeout(r, 700));
+    haptic('success');
+    toast.success('Signed in');
+    router.replace('/(tabs)');
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -58,7 +72,7 @@ export default function SignInScreen() {
         </View>
 
         <View className="mt-10">
-          <Button label="Sign In" onPress={() => router.replace('/(tabs)')} />
+          <Button label="Sign In" onPress={submit} loading={submitting} />
         </View>
         <View className="flex-row items-center justify-center mt-4">
           <Text className="text-textSecondary text-sm">Don't have an account?</Text>

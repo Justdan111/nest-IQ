@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
+import { haptic } from '@/utils/haptics';
 
 type Door = { id: string; name: string; tint: string; locked: boolean };
 type Section = { title: string; doors: Door[] };
@@ -60,6 +61,7 @@ export default function SecurityScreen() {
     );
 
   const selectMode = (next: 'home' | 'away') => {
+    haptic(next === 'away' ? 'warning' : 'success');
     setAwayMode(next === 'away');
     // Leaving the house locks everything up.
     if (next === 'away') setAllLocked(true);
@@ -140,7 +142,11 @@ function DoorRow({
       </View>
       <View className="flex-row gap-2">
         <Pressable
-          onPress={() => onSetLock(door.id, true)}
+          onPress={() => {
+            // Locking is a high-stakes action — give it a firm thunk.
+            haptic('heavy');
+            onSetLock(door.id, true);
+          }}
           className={`w-9 h-9 rounded-full items-center justify-center ${door.locked ? 'bg-primary' : 'bg-surfaceAlt'}`}
         >
           <Ionicons
@@ -150,7 +156,10 @@ function DoorRow({
           />
         </Pressable>
         <Pressable
-          onPress={() => onSetLock(door.id, false)}
+          onPress={() => {
+            haptic('medium');
+            onSetLock(door.id, false);
+          }}
           className={`w-9 h-9 rounded-full items-center justify-center ${!door.locked ? 'bg-primary' : 'bg-surfaceAlt'}`}
         >
           <Ionicons
