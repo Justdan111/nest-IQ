@@ -12,6 +12,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SuccessModal } from '@/components/ui/SuccessModal';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ImageViewer } from '@/components/ui/ImageViewer';
 import type { RoomMedia } from '@/types';
 
@@ -206,16 +207,13 @@ export default function RoomDetailsScreen() {
           />
 
           {roomDevices.length === 0 ? (
-            <View className="bg-surface rounded-2xl p-6 items-center">
-              <Ionicons
-                name="hardware-chip-outline"
-                size={28}
-                color={colors.textSecondary}
-              />
-              <Text className="text-textSecondary text-sm mt-2">
-                No devices in {room.name} yet.
-              </Text>
-            </View>
+            <EmptyState
+              icon="hardware-chip-outline"
+              title={`No devices in ${room.name} yet`}
+              message="Connect lamps, AC, cameras or anything compatible to control them from here."
+              ctaLabel="Add device"
+              onCtaPress={openAdd}
+            />
           ) : (
             <View className="flex-row flex-wrap" style={{ gap: 12 }}>
               {roomDevices.map((d) => (

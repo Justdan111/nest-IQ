@@ -10,6 +10,7 @@ import { useRooms } from '@/hooks/useRooms';
 import { useTheme } from '@/hooks/useTheme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import type { Category, Room } from '@/types';
 
@@ -172,11 +173,14 @@ export default function RoomsScreen() {
         contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 20 }}
       >
         {filteredRooms.length === 0 ? (
-          <View className="bg-surface rounded-2xl p-8 items-center mt-2">
-            <Ionicons name="home-outline" size={28} color={colors.textSecondary} />
-            <Text className="text-textSecondary text-sm mt-2 text-center">
-              No rooms in this category yet.
-            </Text>
+          <View className="mt-2">
+            <EmptyState
+              icon="home-outline"
+              title="No rooms in this category yet"
+              message="Add your first room to start setting up devices and scenes here."
+              ctaLabel="Add new room"
+              onCtaPress={openAddRoom}
+            />
           </View>
         ) : (
           filteredRooms.map((r) => {
