@@ -11,6 +11,7 @@ import { AppStateProvider } from '@/hooks/useAppState';
 import { DevicesProvider } from '@/hooks/useDevices';
 import { RoomsProvider } from '@/hooks/useRooms';
 import { ScenesProvider } from '@/hooks/useScenes';
+import { ToastProvider } from '@/components/ui/Toast';
 import { NotificationsProvider } from '@/hooks/useNotifications';
 
 export default function RootLayout() {
@@ -34,14 +35,16 @@ export default function RootLayout() {
             <RoomsProvider>
               <DevicesProvider>
                 <ScenesProvider>
-                  <StatusBar style="auto" />
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: colors.background },
-                      animation: 'fade',
-                    }}
-                  />
+                  <ToastProvider>
+                    <StatusBar style="auto" />
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        contentStyle: { backgroundColor: colors.background },
+                        animation: 'fade',
+                      }}
+                    />
+                  </ToastProvider>
                 </ScenesProvider>
               </DevicesProvider>
             </RoomsProvider>
