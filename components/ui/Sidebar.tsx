@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { Alert, Dimensions, Pressable, Text, View } from 'react-native';
+import { Dimensions, Pressable, Text, View } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { useAppState } from '@/hooks/useAppState';
 import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/components/ui/Avatar';
+import { useToast } from '@/components/ui/Toast';
 
 const { width } = Dimensions.get('window');
 const PANEL_WIDTH = Math.min(width * 0.82, 340);
@@ -50,6 +51,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user } = useAppState();
   const { colors } = useTheme();
+  const toast = useToast();
   const [rendered, setRendered] = useState(false);
   const progress = useSharedValue(0);
 
@@ -83,7 +85,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const go = (route?: string) => {
     close();
     if (route) router.push(route as never);
-    else Alert.alert('Coming soon', 'This section is not available yet.');
+    else toast.show('Coming soon', { type: 'info' });
   };
 
   return (
