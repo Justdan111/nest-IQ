@@ -1,6 +1,4 @@
-import {
-  createContext,
-  createElement, useCallback, useContext, useMemo, useState, type ReactNode, } from 'react';
+import { createContext, createElement, useCallback, useContext, useMemo, useState, type ReactNode, } from 'react';
 import { CATEGORIES, ROOMS } from '@/constants/Rooms';
 import type { Category, Room, RoomMedia } from '@/types';
 
